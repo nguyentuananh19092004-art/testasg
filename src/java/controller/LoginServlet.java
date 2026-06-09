@@ -22,10 +22,17 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Lấy thông tin từ form
-        String role = request.getParameter("role");
         String username = request.getParameter("username");
         String password = request.getParameter("password");
+        
+        // Tự động suy luận role dựa trên username (Mock)
+        String role = "admin"; // Mặc định
+        if (username != null) {
+            username = username.toLowerCase();
+            if (username.contains("giamthi")) role = "giamthi";
+            else if (username.contains("phuhuynh")) role = "phuhuynh";
+            else if (username.contains("taixe")) role = "taixe";
+        }
         
         // TODO: Thực hiện gọi DAO để kiểm tra đăng nhập thực tế ở đây
         // Ví dụ: boolean isValid = userDAO.checkLogin(username, password, role);

@@ -8,66 +8,94 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        body, html {
+            min-height: 100%;
             margin: 0;
-        }
-        .login-wrapper {
-            width: 100%;
-            max-width: 1100px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .bus-illustration {
-            flex: 1.2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-        @keyframes floatingBus {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0); }
-        }
-        .bus-image {
-            max-width: 90%;
-            height: auto;
-            animation: floatingBus 3s ease-in-out infinite;
-            filter: drop-shadow(0 20px 20px rgba(0,0,0,0.15));
-            /* Giúp xóa nền trắng nếu file ảnh chưa trong suốt hoàn toàn */
-            mix-blend-mode: multiply; 
-        }
-        .illustration-text {
-            color: #2c3e50;
-            margin-top: 30px;
-        }
-        .illustration-text h1 {
-            font-weight: 800;
-            font-size: 2.5rem;
+            font-family: 'Inter', sans-serif;
         }
         
-        .login-card {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 50px 40px;
-            max-width: 450px;
+        .bg-image {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('img/urban_bus_bg.png') no-repeat center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); /* Dark overlay */
+            z-index: -1;
+        }
+
+        /* Header styling */
+        .top-header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 0 40px;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: #fff !important;
+            text-decoration: none;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-brand i {
+            color: #ffc107;
+            font-size: 1.8rem;
+        }
+        .nav-links {
             margin-left: auto;
+            display: flex;
+            gap: 25px;
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #ffc107;
+        }
+
+        /* Main Content */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 80px; /* Offset for header */
+            padding-bottom: 20px;
+        }
+
+        .login-card {
+            background: rgba(15, 15, 15, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            padding: 40px 40px;
+            width: 100%;
+            max-width: 440px;
+            color: #fff;
         }
         .login-header {
             text-align: center;
@@ -75,155 +103,125 @@
         }
         .login-header h3 {
             font-weight: 700;
-            color: #333;
+            font-size: 1.8rem;
             margin-bottom: 5px;
         }
         .login-header p {
-            color: #6c757d;
+            color: rgba(255,255,255,0.7);
             font-size: 0.95rem;
         }
-        .role-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        .role-option {
-            flex: 1 1 calc(50% - 10px);
-        }
-        .role-option input[type="radio"] {
-            display: none;
-        }
-        .role-option label {
-            display: block;
-            text-align: center;
-            padding: 12px 10px;
-            border: 2px solid #e9ecef;
+        
+        /* Fixed Form Input Styling */
+        .form-floating > .form-control {
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: #fff !important;
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            color: #6c757d;
-            background: #fff;
+            height: calc(3.5rem + 2px);
+            padding: 1rem 0.75rem;
         }
-        .role-option input[type="radio"]:checked + label {
-            border-color: #4a90e2;
-            background: #f0f7ff;
-            color: #4a90e2;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.15);
+        .form-floating > .form-control:focus {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            border-color: #ffc107 !important;
+            box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
         }
-        .role-option label i {
-            display: block;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+        .form-floating > label {
+            color: rgba(255, 255, 255, 0.6);
+            padding: 1rem 0.75rem;
         }
-        .form-floating > .form-control:focus ~ label {
-            color: #4a90e2;
+        .form-floating > label::after {
+            background-color: transparent !important;
         }
-        .form-control:focus {
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25);
-            border-radius: 10px;
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #ffc107;
+            transform: scale(0.85) translateY(-0.8rem) translateX(0.15rem);
         }
-        .form-control {
-            border-radius: 10px;
+        
+        /* Fix Chrome Autocomplete */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px rgba(0, 0, 0, 0.5) inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
+
         .btn-login {
-            background: linear-gradient(135deg, #4a90e2, #007aff);
+            background: linear-gradient(135deg, #ffc107, #ff9800);
             border: none;
-            color: white;
-            padding: 15px;
+            color: #000;
+            padding: 12px;
             border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1rem;
+            font-weight: 700;
+            font-size: 1.05rem;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 15px;
         }
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
-            color: white;
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+            color: #000;
         }
-        .back-home {
-            text-align: center;
-            margin-top: 20px;
+
+        .form-check-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
         }
-        .back-home a {
-            color: #6c757d;
+        .forgot-pass {
+            color: #ffc107;
             text-decoration: none;
             font-size: 0.9rem;
             transition: color 0.3s;
         }
-        .back-home a:hover {
-            color: #4a90e2;
+        .forgot-pass:hover {
+            color: #fff;
+            text-decoration: underline;
         }
 
-        @media (max-width: 992px) {
-            .login-wrapper {
-                flex-direction: column;
-                justify-content: center;
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 0 20px;
             }
-            .bus-illustration {
-                display: none; /* Ẩn hình ảnh trên mobile để tập trung vào form */
+            .nav-links {
+                display: none;
             }
             .login-card {
-                margin: 0 auto;
-                width: 100%;
+                padding: 30px 25px;
+                max-width: 90%;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-wrapper">
-        <!-- Khu vực hình ảnh bên trái -->
-        <div class="bus-illustration">
-            <img src="img/bus.png" alt="School Bus" class="bus-image">
-            <div class="illustration-text">
-                <h1>Hệ thống quản lý School Bus</h1>
-                <p class="lead">Trường Marie Curie - An toàn, Tiện lợi, Chuyên nghiệp</p>
-            </div>
-        </div>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
 
-        <!-- Khu vực form đăng nhập bên phải -->
+    <!-- Header riêng biệt -->
+    <header class="top-header">
+        <a href="index.jsp" class="navbar-brand">
+            <i class="bi bi-bus-front-fill me-2"></i>SCHOOLBUS
+        </a>
+        <div class="nav-links">
+            <a href="index.jsp">Trang Chủ</a>
+            <a href="index.jsp#ve-chung-toi">Về Chúng Tôi</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
         <div class="login-card">
             <div class="login-header">
-                <h3>Đăng Nhập</h3>
-                <p>Chọn vai trò của bạn</p>
+                <h3>Đăng nhập hệ thống</h3>
+                <p>Vui lòng nhập tài khoản của bạn</p>
             </div>
 
             <form action="LoginServlet" method="POST">
-                <!-- Role Selection -->
-                <div class="role-selector">
-                    <div class="role-option">
-                        <input type="radio" name="role" id="role-admin" value="admin" checked>
-                        <label for="role-admin">
-                            <i class="bi bi-shield-lock"></i>
-                            Admin
-                        </label>
-                    </div>
-                    <div class="role-option">
-                        <input type="radio" name="role" id="role-supervisor" value="giamthi">
-                        <label for="role-supervisor">
-                            <i class="bi bi-person-badge"></i>
-                            Giám Thị
-                        </label>
-                    </div>
-                    <div class="role-option">
-                        <input type="radio" name="role" id="role-parent" value="phuhuynh">
-                        <label for="role-parent">
-                            <i class="bi bi-people"></i>
-                            Phụ Huynh
-                        </label>
-                    </div>
-                    <div class="role-option">
-                        <input type="radio" name="role" id="role-driver" value="taixe">
-                        <label for="role-driver">
-                            <i class="bi bi-car-front"></i>
-                            Tài Xế
-                        </label>
-                    </div>
-                </div>
 
                 <!-- Credentials -->
                 <div class="form-floating mb-3">
@@ -231,7 +229,7 @@
                     <label for="username">Tên đăng nhập</label>
                 </div>
                 
-                <div class="form-floating mb-4">
+                <div class="form-floating mb-3">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
                     <label for="password">Mật khẩu</label>
                 </div>
@@ -239,18 +237,14 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="rememberMe">
-                        <label class="form-check-label text-muted" for="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
                             Ghi nhớ tôi
                         </label>
                     </div>
-                    <a href="#" class="text-decoration-none" style="color: #4a90e2; font-size: 0.9rem;">Quên mật khẩu?</a>
+                    <a href="#" class="forgot-pass">Quên mật khẩu?</a>
                 </div>
 
                 <button type="submit" class="btn btn-login w-100">Đăng Nhập</button>
-
-                <div class="back-home">
-                    <a href="index.jsp"><i class="bi bi-arrow-left me-1"></i> Trở về trang chủ</a>
-                </div>
             </form>
         </div>
     </div>

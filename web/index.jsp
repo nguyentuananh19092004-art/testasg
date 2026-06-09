@@ -17,8 +17,7 @@
         .bus-image {
             max-width: 100%;
             height: auto;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            mix-blend-mode: multiply;
         }
         .feature-icon {
             font-size: 2.5rem;
@@ -68,7 +67,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <!-- Ảnh do người dùng upload -->
-                    <img src="img/home_bus.png" alt="School Bus" class="bus-image img-fluid">
+                    <img src="img/anh1.png" alt="School Bus" class="bus-image img-fluid">
                 </div>
             </div>
         </div>
