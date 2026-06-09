@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core" %>
+<%@page import="java.util.List"%>
+<%@page import="model.User"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -32,28 +33,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach items="${userList}" var="u">
+                        <%
+                            List<User> userList = (List<User>) request.getAttribute("userList");
+                            if (userList != null) {
+                                for (User u : userList) {
+                        %>
                             <tr>
-                                <td>${u.userID}</td>
-                                <td>${u.username}</td>
-                                <td>${u.fullName}</td>
+                                <td><%= u.getUserID() %></td>
+                                <td><%= u.getUsername() %></td>
+                                <td><%= u.getFullName() %></td>
                                 <td>
-                                    <c:choose>
-                                        <c:when test="${u.role == 'ADMIN'}"><span class="badge bg-danger">ADMIN</span></c:when>
-                                        <c:when test="${u.role == 'DRIVER'}"><span class="badge bg-success">TÀI XẾ</span></c:when>
-                                        <c:when test="${u.role == 'MONITOR'}"><span class="badge bg-info text-dark">GIÁM SÁT</span></c:when>
-                                        <c:when test="${u.role == 'PARENT'}"><span class="badge bg-warning text-dark">PHỤ HUYNH</span></c:when>
-                                        <c:otherwise><span class="badge bg-secondary">${u.role}</span></c:otherwise>
-                                    </c:choose>
+                                    <% if ("ADMIN".equals(u.getRole())) { %>
+                                        <span class="badge bg-danger">ADMIN</span>
+                                    <% } else if ("DRIVER".equals(u.getRole())) { %>
+                                        <span class="badge bg-success">TÀI XẾ</span>
+                                    <% } else if ("MONITOR".equals(u.getRole())) { %>
+                                        <span class="badge bg-info text-dark">GIÁM SÁT</span>
+                                    <% } else if ("PARENT".equals(u.getRole())) { %>
+                                        <span class="badge bg-warning text-dark">PHỤ HUYNH</span>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary"><%= u.getRole() %></span>
+                                    <% } %>
                                 </td>
-                                <td>${u.phone}</td>
-                                <td>${u.email}</td>
+                                <td><%= u.getPhone() != null ? u.getPhone() : "" %></td>
+                                <td><%= u.getEmail() != null ? u.getEmail() : "" %></td>
                                 <td>
-                                    <a href="user-edit?id=${u.userID}" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Sửa</a>
-                                    <a href="user-delete?id=${u.userID}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');"><i class="bi bi-trash"></i> Xóa</a>
+                                    <a href="user-edit?id=<%= u.getUserID() %>" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                    <a href="user-delete?id=<%= u.getUserID() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');"><i class="bi bi-trash"></i> Xóa</a>
                                 </td>
                             </tr>
-                        </c:forEach>
+                        <%
+                                }
+                            }
+                        %>
                     </tbody>
                 </table>
             </div>

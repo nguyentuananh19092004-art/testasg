@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core" %>
+<%@page import="java.util.List"%>
+<%@page import="model.HocSinh"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,22 +24,29 @@
                         <th>Hành động</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <c:forEach items="${hocsinhList}" var="hs">
+                    <tbody>
+                        <%
+                            List<HocSinh> hocsinhList = (List<HocSinh>) request.getAttribute("hocsinhList");
+                            if (hocsinhList != null) {
+                                for (HocSinh hs : hocsinhList) {
+                        %>
                         <tr>
-                            <td>${hs.maHocSinh}</td>
-                            <td>${hs.tenHocSinh}</td>
-                            <td>${hs.lop}</td>
-                            <td>${hs.tenTK}</td>
-                            <td>${hs.matKhau}</td>
-                            <td>${hs.trangThai}</td>
+                            <td><%= hs.getMaHocSinh() %></td>
+                            <td><%= hs.getTenHocSinh() %></td>
+                            <td><%= hs.getLop() %></td>
+                            <td><%= hs.getTenTK() %></td>
+                            <td><%= hs.getMatKhau() %></td>
+                            <td><%= hs.getTrangThai() %></td>
                             <td>
-                                <a href="hocsinh-edit?id=${hs.maHocSinh}" class="btn btn-sm btn-warning">Sửa</a>
-                                <a href="hocsinh-delete?id=${hs.maHocSinh}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa học sinh này?');">Xóa</a>
+                                <a href="hocsinh-edit?id=<%= hs.getMaHocSinh() %>" class="btn btn-sm btn-warning">Sửa</a>
+                                <a href="hocsinh-delete?id=<%= hs.getMaHocSinh() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa học sinh này?');">Xóa</a>
                             </td>
                         </tr>
-                    </c:forEach>
-                </tbody>
+                        <%
+                                }
+                            }
+                        %>
+                    </tbody>
             </table>
         </div>
     </body>

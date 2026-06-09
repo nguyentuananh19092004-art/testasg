@@ -137,9 +137,9 @@
                         <h5 class="fw-bold"><i class="bi bi-gear-fill me-2 text-primary"></i>Quản lý nhanh</h5>
                     </div>
                     <div class="card-body">
-                        <a href="hocsinh_list.jsp" class="btn btn-outline-primary me-2"><i class="bi bi-person-lines-fill me-1"></i> Quản lý Học Sinh</a>
+                        <a href="hocsinh-list" class="btn btn-outline-primary me-2"><i class="bi bi-person-lines-fill me-1"></i> Quản lý Học Sinh</a>
                         <a href="ScheduleServlet" class="btn btn-outline-success me-2"><i class="bi bi-calendar-check me-1"></i> Phân ca & Lịch trình</a>
-                        <a href="#" class="btn btn-outline-warning me-2"><i class="bi bi-bus-front me-1"></i> Quản lý Xe Bus</a>
+                        <a href="bus-list" class="btn btn-outline-warning me-2"><i class="bi bi-bus-front me-1"></i> Quản lý Xe Bus</a>
                         <a href="user-list" class="btn btn-outline-info"><i class="bi bi-person-badge-fill me-1"></i> Quản lý Nhân viên / Tài khoản</a>
                     </div>
                 </div>

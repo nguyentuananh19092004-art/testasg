@@ -36,6 +36,13 @@ public class LoginServlet extends HttpServlet {
         dal.UserDAO userDAO = new dal.UserDAO();
         boolean isValid = userDAO.checkLogin(username, password, dbRole);
         
+        // Nếu chọn vai trò phụ huynh mà không tìm thấy trong bảng Users,
+        // thì kiểm tra xem họ có đang đăng nhập bằng tài khoản Học Sinh không.
+        if (!isValid && "phuhuynh".equals(role)) {
+            dal.HocSinhDAO hocSinhDAO = new dal.HocSinhDAO();
+            isValid = hocSinhDAO.checkLogin(username, password);
+        }
+        
         if (isValid) {
             HttpSession session = request.getSession();
             session.setAttribute("userRole", role);
