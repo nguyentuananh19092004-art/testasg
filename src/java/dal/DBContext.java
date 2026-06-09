@@ -10,7 +10,7 @@ public class DBContext {
     public DBContext() {
         try {
             // Thay đổi username và password nếu môi trường SQL Server của bạn khác
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=SchoolBusDB";
+            String url = "jdbc:sqlserver://localhost:1433;databaseName=SchoolBusDB;encrypt=true;trustServerCertificate=true;";
             String username = "sa";
             String password = "123"; // Mật khẩu thường dùng, bạn hãy sửa lại nếu cần
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
