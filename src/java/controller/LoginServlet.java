@@ -25,6 +25,7 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         
+<<<<<<< HEAD
         // Tự động suy luận role dựa trên username (Mock)
         String role = "admin"; // Mặc định
         if (username != null) {
@@ -37,6 +38,23 @@ public class LoginServlet extends HttpServlet {
         // TODO: Thực hiện gọi DAO để kiểm tra đăng nhập thực tế ở đây
         // Ví dụ: boolean isValid = userDAO.checkLogin(username, password, role);
         boolean isValid = true; // Mặc định cho qua để test giao diện
+=======
+        String dbRole = "";
+        if ("admin".equals(role)) dbRole = "ADMIN";
+        else if ("giamthi".equals(role)) dbRole = "MONITOR";
+        else if ("phuhuynh".equals(role)) dbRole = "PARENT";
+        else if ("taixe".equals(role)) dbRole = "DRIVER";
+        
+        dal.UserDAO userDAO = new dal.UserDAO();
+        boolean isValid = userDAO.checkLogin(username, password, dbRole);
+        
+        // Nếu chọn vai trò phụ huynh mà không tìm thấy trong bảng Users,
+        // thì kiểm tra xem họ có đang đăng nhập bằng tài khoản Học Sinh không.
+        if (!isValid && "phuhuynh".equals(role)) {
+            dal.HocSinhDAO hocSinhDAO = new dal.HocSinhDAO();
+            isValid = hocSinhDAO.checkLogin(username, password);
+        }
+>>>>>>> 3048d7665dd2a39a4b21b08ff0912925da7628f8
         
         if (isValid) {
             HttpSession session = request.getSession();

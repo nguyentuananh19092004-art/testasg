@@ -97,4 +97,20 @@ public class HocSinhDAO extends DBContext {
             System.out.println(e);
         }
     }
+
+    public boolean checkLogin(String tenTK, String matKhau) {
+        String sql = "SELECT * FROM HocSinh WHERE TenTK = ? AND MatKhau = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, tenTK);
+            st.setString(2, matKhau);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
 }

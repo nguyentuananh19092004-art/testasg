@@ -1,4 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="dal.RouteDAO"%>
+<%@page import="model.Route"%>
+<%@page import="java.util.List"%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -92,6 +95,39 @@
                     <h3 class="h4 fw-bold">Lộ Trình Tối Ưu</h3>
                     <p class="text-secondary">8 lộ trình phủ khắp Hà Nội với các điểm đón tập trung, đảm bảo học sinh di chuyển thuận tiện nhất.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Routes Section -->
+    <section class="py-5 bg-light" id="tuyen-xe">
+        <div class="container my-5">
+            <h2 class="text-center fw-bold mb-5">Các Tuyến Xe Đưa Đón</h2>
+            <div class="row g-4">
+                <%
+                    RouteDAO routeDAO = new RouteDAO();
+                    List<Route> routes = routeDAO.getAllRoutes();
+                    if (routes != null && !routes.isEmpty()) {
+                        for (Route r : routes) {
+                %>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0" style="transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary"><i class="bi bi-signpost-split-fill me-2 text-warning"></i>Tuyến <%= r.getRouteCode() %></h5>
+                            <p class="card-text text-secondary mt-3"><%= r.getRouteName() %></p>
+                        </div>
+                    </div>
+                </div>
+                <%
+                        }
+                    } else {
+                %>
+                <div class="col-12 text-center text-muted">
+                    <p>Hiện tại chưa có tuyến xe nào được cập nhật.</p>
+                </div>
+                <%
+                    }
+                %>
             </div>
         </div>
     </section>
