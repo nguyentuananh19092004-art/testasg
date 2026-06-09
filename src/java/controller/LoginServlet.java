@@ -27,9 +27,14 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         
-        // TODO: Thực hiện gọi DAO để kiểm tra đăng nhập thực tế ở đây
-        // Ví dụ: boolean isValid = userDAO.checkLogin(username, password, role);
-        boolean isValid = true; // Mặc định cho qua để test giao diện
+        String dbRole = "";
+        if ("admin".equals(role)) dbRole = "ADMIN";
+        else if ("giamthi".equals(role)) dbRole = "MONITOR";
+        else if ("phuhuynh".equals(role)) dbRole = "PARENT";
+        else if ("taixe".equals(role)) dbRole = "DRIVER";
+        
+        dal.UserDAO userDAO = new dal.UserDAO();
+        boolean isValid = userDAO.checkLogin(username, password, dbRole);
         
         if (isValid) {
             HttpSession session = request.getSession();
