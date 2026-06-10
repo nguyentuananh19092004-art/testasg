@@ -14,12 +14,15 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold"><i class="bi bi-bus-front text-warning me-2"></i>Danh sách Xe Bus</h2>
-            <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+            <div>
+                <a href="bus-create" class="btn btn-success me-2"><i class="bi bi-plus-circle"></i> Thêm Xe Bus</a>
+                <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+            </div>
         </div>
         
         <div class="card shadow-sm">
             <div class="card-body p-0">
-                <table class="table table-hover table-striped mb-0">
+                <table class="table table-hover table-striped mb-0 text-center align-middle">
                     <thead class="table-dark">
                         <tr>
                             <th>ID Xe</th>
@@ -42,14 +45,17 @@
                                 <td>
                                     <% if ("Hoạt động".equalsIgnoreCase(b.getStatus()) || "Active".equalsIgnoreCase(b.getStatus())) { %>
                                         <span class="badge bg-success">Hoạt động</span>
-                                    <% } else if ("Bảo trì".equalsIgnoreCase(b.getStatus()) || "Maintenance".equalsIgnoreCase(b.getStatus())) { %>
-                                        <span class="badge bg-warning text-dark">Bảo trì</span>
+                                    <% } else if ("Sửa chữa".equalsIgnoreCase(b.getStatus()) || "Maintenance".equalsIgnoreCase(b.getStatus())) { %>
+                                        <span class="badge bg-danger">Sửa chữa</span>
+                                    <% } else if ("Nghỉ".equalsIgnoreCase(b.getStatus()) || "Rest".equalsIgnoreCase(b.getStatus())) { %>
+                                        <span class="badge bg-secondary">Nghỉ</span>
                                     <% } else { %>
-                                        <span class="badge bg-secondary"><%= b.getStatus() %></span>
+                                        <span class="badge bg-info"><%= b.getStatus() %></span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary" onclick="alert('Tính năng sửa đang phát triển')"><i class="bi bi-pencil"></i> Sửa</button>
+                                    <a href="bus-update?id=<%= b.getBusID() %>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Sửa</a>
+                                    <a href="bus-delete?id=<%= b.getBusID() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa xe này?');"><i class="bi bi-trash"></i> Xóa</a>
                                 </td>
                             </tr>
                         <%

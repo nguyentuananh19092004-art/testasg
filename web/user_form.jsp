@@ -1,68 +1,82 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.User"%>
 <%
-    User user = (User) request.getAttribute("user");
-    boolean isUpdate = (user != null);
+    User u = (User) request.getAttribute("userObj");
+    String role = (String) request.getAttribute("role");
+    boolean isEdit = (u != null);
+    String titleRole = "DRIVER".equals(role) ? "Lái xe" : "Giám sát";
 %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title><%= isUpdate ? "Cập nhật" : "Thêm mới" %> Tài khoản / Nhân viên</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-    <body>
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white">
-                            <h4 class="mb-0"><%= isUpdate ? "Cập nhật tài khoản" : "Thêm tài khoản mới" %></h4>
-                        </div>
-                        <div class="card-body">
-                            <form action="<%= isUpdate ? "user-edit" : "user-add" %>" method="POST">
-                                <% if (isUpdate) { %>
-                                    <input type="hidden" name="userID" value="<%= user.getUserID() %>">
-                                <% } %>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Tên đăng nhập</label>
-                                    <input type="text" class="form-control" name="username" value="<%= isUpdate ? user.getUsername() : "" %>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Mật khẩu</label>
-                                    <input type="text" class="form-control" name="password" value="<%= isUpdate ? user.getPassword() : "123" %>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" name="fullName" value="<%= isUpdate && user.getFullName() != null ? user.getFullName() : "" %>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Vai trò</label>
-                                    <select class="form-select" name="role" required>
-                                        <option value="ADMIN" <%= isUpdate && "ADMIN".equals(user.getRole()) ? "selected" : "" %>>ADMIN - Quản trị viên</option>
-                                        <option value="DRIVER" <%= isUpdate && "DRIVER".equals(user.getRole()) ? "selected" : "" %>>DRIVER - Tài xế</option>
-                                        <option value="MONITOR" <%= isUpdate && "MONITOR".equals(user.getRole()) ? "selected" : "" %>>MONITOR - Giám sát</option>
-                                        <option value="PARENT" <%= isUpdate && "PARENT".equals(user.getRole()) ? "selected" : "" %>>PARENT - Phụ huynh</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" name="phone" value="<%= isUpdate && user.getPhone() != null ? user.getPhone() : "" %>">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" name="email" value="<%= isUpdate && user.getEmail() != null ? user.getEmail() : "" %>">
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <a href="user-list" class="btn btn-secondary">Quay lại</a>
-                                    <button type="submit" class="btn btn-success">Lưu lại</button>
-                                </div>
-                            </form>
-                        </div>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title><%= isEdit ? "Cập nhật" : "Thêm mới" %> <%= titleRole %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f6f9; }
+        .card { border: none; border-radius: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="bi <%= isEdit ? "bi-pencil-square" : "bi-plus-circle" %> me-2"></i>
+                            <%= isEdit ? "Cập nhật " + titleRole : "Thêm mới " + titleRole %>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <% String error = (String) request.getAttribute("error");
+                           if (error != null) { %>
+                            <div class="alert alert-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %></div>
+                        <% } %>
+                        <form action="<%= isEdit ? "user-update" : "user-create" %>" method="POST">
+                            <% if (isEdit) { %>
+                                <input type="hidden" name="userID" value="<%= u.getUserID() %>">
+                            <% } %>
+                            <input type="hidden" name="role" value="<%= role %>">
+                            
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-bold">Tên đăng nhập</label>
+                                <input type="text" class="form-control" id="username" name="username" value="<%= isEdit ? u.getUsername() : "" %>" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label fw-bold">Họ và tên</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" value="<%= isEdit ? u.getFullName() : "" %>" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phone" class="form-label fw-bold">Số điện thoại</label>
+                                <input type="text" class="form-control" id="phone" name="phone" value="<%= isEdit && u.getPhone() != null ? u.getPhone() : "" %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label fw-bold">Email (Tuỳ chọn)</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<%= isEdit && u.getEmail() != null ? u.getEmail() : "" %>">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="status" class="form-label fw-bold">Trạng thái</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="Active" <%= (isEdit && "Active".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Hoạt động</option>
+                                    <option value="Rest" <%= (isEdit && "Rest".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Nghỉ</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="user-list?role=<%= role %>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> <%= isEdit ? "Cập nhật" : "Lưu" %></button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
 </html>

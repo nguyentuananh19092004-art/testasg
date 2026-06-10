@@ -8,11 +8,12 @@ public class User {
     private String fullName;
     private String phone;
     private String email;
+    private String status;
 
     public User() {
     }
 
-    public User(int userID, String username, String password, String role, String fullName, String phone, String email) {
+    public User(int userID, String username, String password, String role, String fullName, String phone, String email, String status) {
         this.userID = userID;
         this.username = username;
         this.password = password;
@@ -20,6 +21,7 @@ public class User {
         this.fullName = fullName;
         this.phone = phone;
         this.email = email;
+        this.status = status;
     }
 
     public int getUserID() {
@@ -76,5 +78,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
