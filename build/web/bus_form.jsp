@@ -51,9 +51,9 @@
                             <div class="mb-4">
                                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                                 <select class="form-select" id="status" name="status" required>
-                                    <option value="Active" <%= (isEdit && "Active".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Hoạt động</option>
-                                    <option value="Rest" <%= (isEdit && "Rest".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Nghỉ</option>
-                                    <option value="Maintenance" <%= (isEdit && "Maintenance".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sửa chữa</option>
+                                    <option value="SAN_SANG" <%= (isEdit && "SAN_SANG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
+                                    <option value="DANG_HOAT_DONG" <%= (isEdit && "DANG_HOAT_DONG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Đang hoạt động</option>
+                                    <option value="BAO_DUONG" <%= (isEdit && "BAO_DUONG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sửa chữa/Bảo dưỡng</option>
                                 </select>
                             </div>
                             

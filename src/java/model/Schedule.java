@@ -11,6 +11,7 @@ public class Schedule {
     private int driverID;
     private int monitorID;
     private String status;
+    private String incidentStatus;
 
     // Các đối tượng liên kết (để hiển thị chi tiết ra View)
     private Route route;
@@ -21,7 +22,7 @@ public class Schedule {
     public Schedule() {
     }
 
-    public Schedule(int scheduleID, Date date, String direction, int routeID, int busID, int driverID, int monitorID, String status) {
+    public Schedule(int scheduleID, Date date, String direction, int routeID, int busID, int driverID, int monitorID, String status, String incidentStatus) {
         this.scheduleID = scheduleID;
         this.date = date;
         this.direction = direction;
@@ -30,6 +31,7 @@ public class Schedule {
         this.driverID = driverID;
         this.monitorID = monitorID;
         this.status = status;
+        this.incidentStatus = incidentStatus;
     }
 
     public int getScheduleID() {
@@ -94,6 +96,14 @@ public class Schedule {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getIncidentStatus() {
+        return incidentStatus;
+    }
+
+    public void setIncidentStatus(String incidentStatus) {
+        this.incidentStatus = incidentStatus;
     }
 
     public Route getRoute() {

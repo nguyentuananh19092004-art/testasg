@@ -1,9 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.*"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 <%
     if(session.getAttribute("userRole") == null || !"giamthi".equals(session.getAttribute("userRole"))) {
         response.sendRedirect("dang_nhap.jsp");
         return;
     }
+    Schedule schedule = (Schedule) request.getAttribute("activeSchedule");
+    Bus bus = (Bus) request.getAttribute("bus");
+    List<Stop> stops = (List<Stop>) request.getAttribute("stops");
+    Map<Integer, List<HocSinh>> studentsByStop = (Map<Integer, List<HocSinh>>) request.getAttribute("studentsByStop");
+    List<Integer> reachedStops = (List<Integer>) request.getAttribute("reachedStops");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -19,13 +27,17 @@
         .navbar { background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .dashboard-card { border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: transform 0.3s ease; }
         .dashboard-card:hover { transform: translateY(-5px); }
+        .stop-item { border-left: 3px solid #1cc88a; padding-left: 15px; margin-bottom: 20px; position: relative; }
+        .stop-item::before { content: ''; position: absolute; left: -9px; top: 0; width: 15px; height: 15px; border-radius: 50%; background: #1cc88a; }
+        .stop-reached { border-left-color: #858796; opacity: 0.7; }
+        .stop-reached::before { background: #858796; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
+            <a class="navbar-brand fw-bold" href="monitor-dashboard">
                 <i class="bi bi-person-badge-fill me-2"></i>Giám Thị Panel
             </a>
             <div class="d-flex align-items-center">
@@ -37,27 +49,89 @@
 
     <div class="container my-5">
         <h2 class="fw-bold mb-4">Nhiệm vụ hôm nay</h2>
+        
+        <% if (schedule != null) { %>
         <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card dashboard-card h-100 border-start border-success border-5">
+            <div class="col-md-12">
+                <div class="card dashboard-card border-start border-success border-5">
                     <div class="card-body">
-                        <h5 class="fw-bold text-success">Chuyến xe đang giám sát</h5>
-                        <p class="text-muted mb-1"><i class="bi bi-bus-front me-2"></i> Xe 29E-111.11 (Tuyến LT1)</p>
-                        <p class="text-muted"><i class="bi bi-clock me-2"></i> Giờ xuất phát: 06:40</p>
-                        <button class="btn btn-success"><i class="bi bi-check2-square me-1"></i> Bắt đầu điểm danh</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card dashboard-card h-100 border-start border-warning border-5">
-                    <div class="card-body">
-                        <h5 class="fw-bold text-warning">Thông báo khẩn cấp</h5>
-                        <p class="text-muted">Chưa có thông báo nào từ phụ huynh về việc học sinh nghỉ học ngày hôm nay.</p>
-                        <button class="btn btn-outline-warning"><i class="bi bi-bell me-1"></i> Xem thông báo</button>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="fw-bold text-success">Chuyến xe đang giám sát</h5>
+                                <p class="text-muted mb-1"><i class="bi bi-bus-front me-2"></i> Xe <%= bus != null ? bus.getLicensePlate() : "" %> (Chuyến: <%= schedule.getDirection().equals("TO_SCHOOL") ? "Đến trường" : "Về nhà" %>)</p>
+                                <p class="text-muted"><i class="bi bi-geo-alt me-2"></i> ID Tuyến: <%= schedule.getRouteID() %></p>
+                            </div>
+                            <span class="badge <%= schedule.getStatus().equals("PENDING") ? "bg-warning text-dark" : "bg-primary" %> fs-6">
+                                <%= schedule.getStatus() %>
+                            </span>
+                        </div>
+                        <hr>
+                        <h6 class="fw-bold mb-3">Lộ trình và Danh sách điểm đón:</h6>
+                        <% if (stops != null && !stops.isEmpty()) { 
+                            for (Stop s : stops) { 
+                                boolean isReached = reachedStops != null && reachedStops.contains(s.getStopID());
+                        %>
+                        <div class="stop-item <%= isReached ? "stop-reached" : "" %>">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0 text-primary"><%= s.getStopName() %> <small class="text-muted">(<%= s.getEstimatedTime() %>)</small></h6>
+                                <% if (!isReached) { %>
+                                <form action="monitor-action" method="POST" class="m-0">
+                                    <input type="hidden" name="action" value="reach_stop">
+                                    <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                                    <input type="hidden" name="stopID" value="<%= s.getStopID() %>">
+                                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check2-circle"></i> Báo Đã Đến</button>
+                                </form>
+                                <% } else { %>
+                                    <span class="badge bg-secondary"><i class="bi bi-check-all"></i> Đã đi qua</span>
+                                <% } %>
+                            </div>
+                            <p class="text-muted small mb-2"><i class="bi bi-geo me-1"></i> <%= s.getAddress() %></p>
+                            
+                            <!-- Danh sách học sinh tại điểm này -->
+                            <div class="bg-light p-3 rounded">
+                                <strong><i class="bi bi-people me-1"></i> Học sinh lên xe:</strong>
+                                <% List<HocSinh> hsList = studentsByStop.get(s.getStopID());
+                                   if (hsList != null && !hsList.isEmpty()) { %>
+                                   <ul class="list-unstyled mt-2 mb-0">
+                                   <% for (HocSinh hs : hsList) { %>
+                                       <li class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                           <span><%= hs.getTenHocSinh() %> (<%= hs.getLop() %>)</span>
+                                           <div>
+                                               <% if ("Nghỉ".equals(hs.getTrangThai())) { %>
+                                                   <span class="badge bg-danger">Báo nghỉ</span>
+                                               <% } else { %>
+                                                    <form action="monitor-action" method="POST" class="d-inline">
+                                                        <input type="hidden" name="action" value="notify_parent">
+                                                        <input type="hidden" name="hocSinhTK" value="<%= hs.getTenTK() %>">
+                                                        <input type="hidden" name="stopName" value="<%= s.getStopName() %>">
+                                                        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-bell"></i> Gọi Phụ Huynh</button>
+                                                    </form>
+                                                    <!-- Nút điểm danh (ví dụ) -->
+                                                    <button class="btn btn-sm btn-outline-success ms-1"><i class="bi bi-person-check"></i> Có mặt</button>
+                                               <% } %>
+                                           </div>
+                                       </li>
+                                   <% } %>
+                                   </ul>
+                                <% } else { %>
+                                   <span class="text-muted small ms-2">Không có học sinh đăng ký tại điểm này.</span>
+                                <% } %>
+                            </div>
+                        </div>
+                        <%  } 
+                           } else { %>
+                            <p class="text-muted">Chưa có dữ liệu điểm đón cho tuyến này.</p>
+                        <% } %>
                     </div>
                 </div>
             </div>
         </div>
+        <% } else { %>
+            <div class="alert alert-info">
+                <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Không có chuyến xe nào</h5>
+                <p class="mb-0">Bạn hiện không được phân công giám sát chuyến xe nào cho ngày hôm nay, hoặc các chuyến đã hoàn thành.</p>
+            </div>
+        <% } %>
     </div>
 </body>
 </html>

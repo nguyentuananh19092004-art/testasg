@@ -1,0 +1,109 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.*"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
+<%
+    if(session.getAttribute("userRole") == null || !"kythuat".equals(session.getAttribute("userRole"))) {
+        response.sendRedirect("dang_nhap.jsp");
+        return;
+    }
+    List<Schedule> incidentSchedules = (List<Schedule>) request.getAttribute("incidentSchedules");
+    List<Bus> maintenanceBuses = (List<Bus>) request.getAttribute("maintenanceBuses");
+    Map<Integer, Bus> busMap = (Map<Integer, Bus>) request.getAttribute("busMap");
+%>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kỹ Thuật Dashboard - School Bus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f6f9; }
+        .navbar { background: linear-gradient(135deg, #434343 0%, #000000 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .dashboard-card { border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: transform 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="technician-dashboard">
+                <i class="bi bi-tools me-2"></i>Kỹ Thuật Panel
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="text-light me-3"><i class="bi bi-person-circle me-1"></i> Xin chào, <b><%= session.getAttribute("username") %></b></span>
+                <a href="dang_nhap.jsp" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h2 class="fw-bold mb-4">Điều phối xe tăng cường & Bảo dưỡng</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card dashboard-card border-start border-danger border-5 h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>Sự cố trên đường (Cần hỗ trợ)</h5>
+                        <% if (incidentSchedules != null && !incidentSchedules.isEmpty()) { %>
+                            <div class="list-group">
+                            <% for (Schedule s : incidentSchedules) { 
+                                Bus b = busMap.get(s.getBusID());
+                            %>
+                                <div class="list-group-item list-group-item-action flex-column align-items-start border-danger mb-2 rounded">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 fw-bold">Tuyến ID: <%= s.getRouteID() %> - Lỗi xe <%= b != null ? b.getLicensePlate() : "" %></h6>
+                                        <small class="text-danger fw-bold">KHẨN CẤP</small>
+                                    </div>
+                                    <p class="mb-1">Tài xế đã báo sự cố. Cần điều xe dự phòng đến hỗ trợ đưa đón học sinh và đưa xe <%= b != null ? b.getLicensePlate() : "" %> về xưởng.</p>
+                                    <form action="technician-action" method="POST" class="mt-2 text-end">
+                                        <input type="hidden" name="action" value="resolve_incident">
+                                        <input type="hidden" name="scheduleID" value="<%= s.getScheduleID() %>">
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-truck me-1"></i> Đã điều xe / Xử lý xong</button>
+                                    </form>
+                                </div>
+                            <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill me-2"></i> Không có sự cố nào trên đường lúc này.
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card dashboard-card border-start border-warning border-5 h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-warning mb-3"><i class="bi bi-tools me-2"></i>Danh sách xe cần bảo dưỡng</h5>
+                        <% if (maintenanceBuses != null && !maintenanceBuses.isEmpty()) { %>
+                            <ul class="list-group list-group-flush">
+                            <% for (Bus b : maintenanceBuses) { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Xe: <%= b.getLicensePlate() %></strong><br>
+                                        <small class="text-muted"><%= b.getCapacity() %> chỗ</small>
+                                    </div>
+                                    <form action="technician-action" method="POST">
+                                        <input type="hidden" name="action" value="finish_maintenance">
+                                        <input type="hidden" name="busID" value="<%= b.getBusID() %>">
+                                        <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-check-lg"></i> Hoàn thành</button>
+                                    </form>
+                                </li>
+                            <% } %>
+                            </ul>
+                        <% } else { %>
+                            <p class="text-muted">Không có xe nào đang ở xưởng bảo dưỡng.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

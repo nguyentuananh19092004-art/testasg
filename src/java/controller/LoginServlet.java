@@ -31,6 +31,7 @@ public class LoginServlet extends HttpServlet {
         else if (userDAO.checkLogin(username, password, "MONITOR")) role = "giamthi";
         else if (userDAO.checkLogin(username, password, "PARENT")) role = "phuhuynh";
         else if (userDAO.checkLogin(username, password, "DRIVER")) role = "taixe";
+        else if (userDAO.checkLogin(username, password, "TECHNICIAN")) role = "kythuat";
         
         boolean isValid = (role != null);
         
@@ -55,6 +56,8 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect("phuhuynh_dashboard.jsp");
             } else if ("taixe".equals(role)) {
                 response.sendRedirect("taixe_dashboard.jsp");
+            } else if ("kythuat".equals(role)) {
+                response.sendRedirect("kythuat_dashboard.jsp");
             } else {
                 response.sendRedirect("index.jsp");
             }

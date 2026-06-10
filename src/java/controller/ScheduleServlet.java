@@ -7,6 +7,7 @@ import dal.UserDAO;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,9 +36,9 @@ public class ScheduleServlet extends HttpServlet {
         RouteDAO routeDAO = new RouteDAO();
         ScheduleDAO scheduleDAO = new ScheduleDAO();
 
-        List<User> drivers = userDAO.getUsersByRole("DRIVER");
-        List<User> monitors = userDAO.getUsersByRole("MONITOR");
-        List<Bus> buses = busDAO.getAllBuses();
+        List<User> drivers = userDAO.getUsersByRole("DRIVER").stream().filter(u -> "SAN_SANG".equals(u.getStatus())).collect(Collectors.toList());
+        List<User> monitors = userDAO.getUsersByRole("MONITOR").stream().filter(u -> "SAN_SANG".equals(u.getStatus())).collect(Collectors.toList());
+        List<Bus> buses = busDAO.getAllBuses().stream().filter(b -> !"BAO_DUONG".equals(b.getStatus())).collect(Collectors.toList());
         List<Route> routes = routeDAO.getAllRoutes();
         List<Schedule> schedules = scheduleDAO.getAllSchedules();
 
@@ -63,7 +64,7 @@ public class ScheduleServlet extends HttpServlet {
             int driverID = Integer.parseInt(request.getParameter("driverID"));
             int monitorID = Integer.parseInt(request.getParameter("monitorID"));
 
-            Schedule s = new Schedule(0, date, direction, routeID, busID, driverID, monitorID, "PENDING");
+            Schedule s = new Schedule(0, date, direction, routeID, busID, driverID, monitorID, "PENDING", "NORMAL");
             ScheduleDAO dao = new ScheduleDAO();
             boolean success = dao.insertSchedule(s);
 

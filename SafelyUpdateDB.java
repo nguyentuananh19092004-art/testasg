@@ -27,18 +27,18 @@ public class SafelyUpdateDB {
             content = content.replaceAll(oldBusesTable, newBusesTable);
 
             // 3. Replace INSERT INTO Buses
-            String oldBusesInsertPattern = "INSERT INTO Buses \\(LicensePlate, Capacity\\) VALUES\\s*\\([^;]+;";
-            String newBusesInsert = "INSERT INTO Buses (LicensePlate, Capacity, Status) VALUES\n" +
-                "('29E-111.11', 29, 'Active'),\n" +
-                "('29E-222.22', 47, 'Active'),\n" +
-                "('29E-333.33', 29, 'Active'),\n" +
-                "('29E-444.44', 47, 'Active'),\n" +
-                "('29E-555.55', 29, 'Rest'),\n" +
-                "('29E-666.66', 47, 'Maintenance'),\n" +
-                "('29E-777.77', 29, 'Active'),\n" +
-                "('29E-888.88', 47, 'Active'),\n" +
-                "('29E-999.99', 29, 'Rest'),\n" +
-                "('29E-101.01', 47, 'Active');";
+            String oldBusesInsertPattern = "INSERT INTO Buses \\(LicensePlate, Capacity, Status\\) VALUES\\s*\\([^;]+;";
+            String newBusesInsert = "INSERT INTO Buses (LicensePlate, Capacity) VALUES\n" +
+                "('29E-111.11', 29),\n" +
+                "('29E-222.22', 47),\n" +
+                "('29E-333.33', 29),\n" +
+                "('29E-444.44', 47),\n" +
+                "('29E-555.55', 29),\n" +
+                "('29E-666.66', 47),\n" +
+                "('29E-777.77', 29),\n" +
+                "('29E-888.88', 47),\n" +
+                "('29E-999.99', 29),\n" +
+                "('29E-101.01', 47);";
             content = content.replaceAll(oldBusesInsertPattern, newBusesInsert);
 
             // 4. Extract HocSinh to generate Parents
@@ -53,20 +53,22 @@ public class SafelyUpdateDB {
             }
 
             // 5. Replace INSERT INTO Users
-            StringBuilder newUsers = new StringBuilder("INSERT INTO Users (Username, Password, Role, FullName, Phone, Email, Status) VALUES\n");
-            newUsers.append("('admin', '123', 'ADMIN', N'Quản trị viên', '0900000001', NULL, 'Active'),\n");
+            StringBuilder newUsers = new StringBuilder("INSERT INTO Users (Username, Password, Role, FullName, Phone, Email) VALUES\n");
+            newUsers.append("('admin', '123', 'ADMIN', N'Quản trị viên', '0900000001', NULL),\n");
             
             for (int i = 1; i <= 10; i++) {
-                String status = (i == 4 || i == 6) ? "Rest" : "Active";
-                newUsers.append(String.format("('taixe%d', '123', 'DRIVER', N'Tài xế %d', '090000001%d', NULL, '%s'),\n", i, i, i%10, status));
+                newUsers.append(String.format("('taixe%d', '123', 'DRIVER', N'Tài xế %d', '090000001%d', NULL),\n", i, i, i%10));
             }
             for (int i = 1; i <= 10; i++) {
-                String status = (i == 4 || i == 6) ? "Rest" : "Active";
-                newUsers.append(String.format("('giamsat%d', '123', 'MONITOR', N'Giám sát %d', '090000002%d', NULL, '%s'),\n", i, i, i%10, status));
+                newUsers.append(String.format("('giamsat%d', '123', 'MONITOR', N'Giám sát %d', '090000002%d', NULL),\n", i, i, i%10));
+            }
+            
+            for (int i = 1; i <= 5; i++) {
+                newUsers.append(String.format("('kythuat%d', '123', 'TECHNICIAN', N'Kỹ thuật %d', '090000003%d', NULL),\n", i, i, i%10));
             }
             
             for (int i = 0; i < parents.size(); i++) {
-                newUsers.append(parents.get(i));
+                newUsers.append(parents.get(i).replace(", 'Active')", ")"));
                 if (i == parents.size() - 1) {
                     newUsers.append(";");
                 } else {
@@ -74,8 +76,13 @@ public class SafelyUpdateDB {
                 }
             }
 
-            String userPattern = "INSERT INTO Users \\(Username, Password, Role, FullName, Phone\\) VALUES\\s*\\([^;]+;";
-            content = content.replaceAll(userPattern, newUsers.toString());
+            String userPattern = "INSERT INTO Users \\(Username, Password, Role, FullName, Phone, Email, Status\\) VALUES\\s*\\([^;]+;";
+            if (!content.replaceAll(userPattern, "").equals(content)) {
+                content = content.replaceAll(userPattern, newUsers.toString());
+            } else {
+                userPattern = "INSERT INTO Users \\(Username, Password, Role, FullName, Phone\\) VALUES\\s*\\([^;]+;";
+                content = content.replaceAll(userPattern, newUsers.toString());
+            }
 
             // Write the file back as UTF-8
             Files.write(path, content.getBytes(StandardCharsets.UTF_8));

@@ -5,7 +5,10 @@
         <group>
             <file>file:/D:/PRJ/AsigmentSU26_PRJ301/src/java/controller/HocSinhCreateServlet.java</file>
             <file>file:/D:/PRJ/AsigmentSU26_PRJ301/web/index.html</file>
+            <file>file:/D:/PRJ/AsigmentSU26_PRJ301/web/bus_form.jsp</file>
+            <file>file:/D:/PRJ/AsigmentSU26_PRJ301/src/java/controller/LoginServlet.java</file>
             <file>file:/D:/PRJ/AsigmentSU26_PRJ301/src/java/dal/HocSinhDAO.java</file>
+            <file>file:/D:/PRJ/AsigmentSU26_PRJ301/web/phuhuynh_dashboard.jsp</file>
             <file>file:/D:/PRJ/AsigmentSU26_PRJ301/src/java/controller/HocSinhUpdateServlet.java</file>
             <file>file:/D:/PRJ/AsigmentSU26_PRJ301/src/java/dal/DBContext.java</file>
         </group>

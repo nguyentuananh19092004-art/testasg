@@ -82,6 +82,30 @@ public class UserDAO extends DBContext {
         return null;
     }
 
+    public User getUserByUsername(String username) {
+        String sql = "SELECT * FROM Users WHERE Username = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("UserID"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Role"),
+                        rs.getString("FullName"),
+                        rs.getString("Phone"),
+                        rs.getString("Email"),
+                        rs.getString("Status")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
     public void insertUser(User u) {
         String sql = "INSERT INTO Users (Username, Password, Role, FullName, Phone, Email, Status) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
@@ -92,7 +116,7 @@ public class UserDAO extends DBContext {
             st.setString(4, u.getFullName());
             st.setString(5, u.getPhone());
             st.setString(6, u.getEmail());
-            st.setString(7, u.getStatus() == null ? "Active" : u.getStatus());
+            st.setString(7, u.getStatus() == null ? "SAN_SANG" : u.getStatus());
             st.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
@@ -150,6 +174,25 @@ public class UserDAO extends DBContext {
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setString(1, username);
+            st.setInt(2, excludeUserId);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean checkPhoneExist(String phone, int excludeUserId) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return false;
+        }
+        String sql = "SELECT 1 FROM Users WHERE Phone = ? AND UserID != ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, phone);
             st.setInt(2, excludeUserId);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {

@@ -19,4 +19,8 @@ public class DBContext {
             System.out.println(ex);
         }
     }
+
+    public Connection getConnection() {
+        return connection;
+    }
 }

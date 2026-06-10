@@ -41,6 +41,14 @@ public class UserCreateServlet extends HttpServlet {
             return;
         }
 
+        if (dao.checkPhoneExist(phone, 0)) {
+            request.setAttribute("error", "Số điện thoại '" + phone + "' đã được người khác sử dụng!");
+            request.setAttribute("userObj", new User(0, username, password, role, fullName, phone, email, status));
+            request.setAttribute("role", role);
+            request.getRequestDispatcher("user_form.jsp").forward(request, response);
+            return;
+        }
+
         User u = new User(0, username, password, role, fullName, phone, email, status);
         dao.insertUser(u);
 

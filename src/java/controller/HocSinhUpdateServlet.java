@@ -38,8 +38,20 @@ public class HocSinhUpdateServlet extends HttpServlet {
         } catch (NumberFormatException e) {
         }
 
-        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, trangThai);
         HocSinhDAO dao = new HocSinhDAO();
+        HocSinh existingByTk = dao.getHocSinhByTenTK(tenTK);
+        if (existingByTk != null && !existingByTk.getMaHocSinh().equals(maHocSinh)) {
+            request.setAttribute("error", "Tên tài khoản đã tồn tại ở học sinh khác!");
+            HocSinh hsError = dao.getHocSinhByMa(maHocSinh);
+            request.setAttribute("hs", hsError);
+            request.getRequestDispatcher("hocsinh_form.jsp").forward(request, response);
+            return;
+        }
+
+        HocSinh oldHs = dao.getHocSinhByMa(maHocSinh);
+        Integer defaultStopID = oldHs != null ? oldHs.getDefaultStopID() : null;
+
+        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, defaultStopID, trangThai);
         dao.updateHocSinh(hs);
 
         response.sendRedirect("hocsinh-list");

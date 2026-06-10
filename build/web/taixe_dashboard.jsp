@@ -1,9 +1,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.*"%>
 <%
     if(session.getAttribute("userRole") == null || !"taixe".equals(session.getAttribute("userRole"))) {
         response.sendRedirect("dang_nhap.jsp");
         return;
     }
+    Schedule schedule = (Schedule) request.getAttribute("activeSchedule");
+    Bus bus = (Bus) request.getAttribute("bus");
+    User monitor = (User) request.getAttribute("monitor");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -25,7 +29,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">
+            <a class="navbar-brand fw-bold" href="driver-dashboard">
                 <i class="bi bi-car-front-fill me-2"></i>Tài Xế Panel
             </a>
             <div class="d-flex align-items-center">
@@ -37,32 +41,53 @@
 
     <div class="container my-5">
         <h2 class="fw-bold mb-4">Lịch trình lái xe</h2>
+        
+        <% if (schedule != null) { %>
         <div class="row g-4">
             <div class="col-md-12">
                 <div class="card dashboard-card border-start border-danger border-5">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="fw-bold text-danger">Tuyến LT1: Ocean Park -> Trường học</h5>
-                                <p class="text-muted mb-0"><i class="bi bi-clock me-2"></i> Bắt đầu lúc: 06:40 AM</p>
+                                <h5 class="fw-bold text-danger">Tuyến ID: <%= schedule.getRouteID() %> (<%= schedule.getDirection().equals("TO_SCHOOL") ? "Đến trường" : "Về nhà" %>)</h5>
+                                <p class="text-muted mb-1"><i class="bi bi-bus-front me-2"></i> Xe: <b><%= bus != null ? bus.getLicensePlate() : "" %></b></p>
+                                <p class="text-muted mb-1"><i class="bi bi-person-badge me-2"></i> Giám sát: <b><%= monitor != null ? monitor.getFullName() : "Trống" %></b></p>
+                                <p class="text-muted mb-0"><i class="bi bi-info-circle me-2"></i> Trạng thái chuyến: <span class="badge bg-secondary"><%= schedule.getStatus() %></span></p>
                             </div>
-                            <button class="btn btn-danger btn-lg"><i class="bi bi-geo-alt-fill me-2"></i> Bắt đầu chuyến đi</button>
-                        </div>
-                        <hr>
-                        <div class="mt-3">
-                            <h6 class="fw-bold mb-3">Danh sách điểm dừng:</h6>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><i class="bi bi-1-circle-fill text-primary me-2"></i> S2.15 (Ocean Park) - 06:40</li>
-                                <li class="list-group-item"><i class="bi bi-2-circle-fill text-primary me-2"></i> S1.08 (Ocean Park) - 06:50</li>
-                                <li class="list-group-item"><i class="bi bi-3-circle-fill text-primary me-2"></i> The Zen Gamuda - 07:10</li>
-                                <li class="list-group-item"><i class="bi bi-4-circle-fill text-primary me-2"></i> LandMark 72 - 07:40</li>
-                                <li class="list-group-item"><i class="bi bi-flag-fill text-success me-2"></i> Trường Marie Curie - 08:00</li>
-                            </ul>
+                            <div class="text-end">
+                                <% if ("PENDING".equals(schedule.getStatus())) { %>
+                                <form action="driver-action" method="POST" class="d-inline">
+                                    <input type="hidden" name="action" value="start_trip">
+                                    <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                                    <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
+                                    <button type="submit" class="btn btn-danger btn-lg mb-2"><i class="bi bi-play-circle-fill me-2"></i> Bắt đầu chuyến đi</button>
+                                </form>
+                                <% } else if ("IN_PROGRESS".equals(schedule.getStatus())) { %>
+                                    <span class="badge bg-success fs-5 mb-2"><i class="bi bi-truck"></i> Đang chạy</span>
+                                <% } %>
+                                
+                                <% if (!"INCIDENT".equals(schedule.getIncidentStatus())) { %>
+                                <form action="driver-action" method="POST" class="mt-2">
+                                    <input type="hidden" name="action" value="report_incident">
+                                    <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                                    <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
+                                    <button type="submit" class="btn btn-outline-warning" onclick="return confirm('Xác nhận báo hỏng xe để yêu cầu kỹ thuật viên hỗ trợ?');"><i class="bi bi-exclamation-triangle"></i> Báo hỏng xe</button>
+                                </form>
+                                <% } else { %>
+                                    <div class="mt-2 text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Đã báo sự cố</div>
+                                <% } %>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <% } else { %>
+            <div class="alert alert-info">
+                <h5 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Không có chuyến xe nào</h5>
+                <p class="mb-0">Bạn hiện không được phân công lái chuyến xe nào cho ngày hôm nay, hoặc chuyến đã hoàn thành.</p>
+            </div>
+        <% } %>
     </div>
 </body>
 </html>

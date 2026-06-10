@@ -4,7 +4,7 @@
     User u = (User) request.getAttribute("userObj");
     String role = (String) request.getAttribute("role");
     boolean isEdit = (u != null);
-    String titleRole = "DRIVER".equals(role) ? "Lái xe" : "Giám sát";
+    String titleRole = "DRIVER".equals(role) ? "Lái xe" : ("TECHNICIAN".equals(role) ? "Kỹ thuật" : "Giám sát");
 %>
 <!DOCTYPE html>
 <html>
@@ -63,8 +63,9 @@
                             <div class="mb-4">
                                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                                 <select class="form-select" id="status" name="status" required>
-                                    <option value="Active" <%= (isEdit && "Active".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Hoạt động</option>
-                                    <option value="Rest" <%= (isEdit && "Rest".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Nghỉ</option>
+                                    <option value="SAN_SANG" <%= (isEdit && "SAN_SANG".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
+                                    <option value="NGHI" <%= (isEdit && "NGHI".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Nghỉ</option>
+                                    <option value="DANG_TRONG_CA" <%= (isEdit && "DANG_TRONG_CA".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Đang trong ca</option>
                                 </select>
                             </div>
                             

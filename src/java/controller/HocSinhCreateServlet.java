@@ -34,8 +34,19 @@ public class HocSinhCreateServlet extends HttpServlet {
         } catch (NumberFormatException e) {
         }
 
-        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, trangThai);
         HocSinhDAO dao = new HocSinhDAO();
+        if (dao.getHocSinhByMa(maHocSinh) != null) {
+            request.setAttribute("error", "Mã học sinh đã tồn tại!");
+            request.getRequestDispatcher("hocsinh_form.jsp").forward(request, response);
+            return;
+        }
+        if (dao.getHocSinhByTenTK(tenTK) != null) {
+            request.setAttribute("error", "Tên tài khoản đã tồn tại!");
+            request.getRequestDispatcher("hocsinh_form.jsp").forward(request, response);
+            return;
+        }
+
+        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, null, trangThai);
         dao.insertHocSinh(hs);
 
         response.sendRedirect("hocsinh-list");

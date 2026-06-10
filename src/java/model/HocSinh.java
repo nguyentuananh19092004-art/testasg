@@ -6,17 +6,19 @@ public class HocSinh {
     private int lop;
     private String tenTK;
     private String matKhau;
+    private Integer defaultStopID;
     private String trangThai;
 
     public HocSinh() {
     }
 
-    public HocSinh(String maHocSinh, String tenHocSinh, int lop, String tenTK, String matKhau, String trangThai) {
+    public HocSinh(String maHocSinh, String tenHocSinh, int lop, String tenTK, String matKhau, Integer defaultStopID, String trangThai) {
         this.maHocSinh = maHocSinh;
         this.tenHocSinh = tenHocSinh;
         this.lop = lop;
         this.tenTK = tenTK;
         this.matKhau = matKhau;
+        this.defaultStopID = defaultStopID;
         this.trangThai = trangThai;
     }
 
@@ -58,6 +60,14 @@ public class HocSinh {
 
     public void setMatKhau(String matKhau) {
         this.matKhau = matKhau;
+    }
+
+    public Integer getDefaultStopID() {
+        return defaultStopID;
+    }
+
+    public void setDefaultStopID(Integer defaultStopID) {
+        this.defaultStopID = defaultStopID;
     }
 
     public String getTrangThai() {

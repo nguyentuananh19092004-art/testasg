@@ -24,19 +24,22 @@ CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
     Username VARCHAR(50) UNIQUE NOT NULL,
     Password VARCHAR(255) NOT NULL, -- Sẽ được hash
-    Role VARCHAR(20) NOT NULL CHECK (Role IN ('ADMIN', 'PARENT', 'DRIVER', 'MONITOR')),
+    Role VARCHAR(20) NOT NULL CHECK (Role IN ('ADMIN', 'PARENT', 'DRIVER', 'MONITOR', 'TECHNICIAN')),
     FullName NVARCHAR(100) NOT NULL,
     Phone VARCHAR(15),
     Email VARCHAR(100),
-    Status VARCHAR(20) DEFAULT 'Active'
+    Status VARCHAR(20) DEFAULT 'SAN_SANG'
 );
+GO
+CREATE UNIQUE NONCLUSTERED INDEX UQ_Users_Phone ON Users(Phone) WHERE Phone IS NOT NULL AND Phone <> '';
+GO
 
 -- 2. Bảng Buses (Thông tin xe)
 CREATE TABLE Buses (
     BusID INT IDENTITY(1,1) PRIMARY KEY,
     LicensePlate VARCHAR(20) UNIQUE NOT NULL,
     Capacity INT NOT NULL CHECK (Capacity IN (29, 47)),
-    Status VARCHAR(20) DEFAULT 'ACTIVE' -- ACTIVE, MAINTENANCE
+    Status VARCHAR(20) DEFAULT 'SAN_SANG' -- SAN_SANG, DANG_HOAT_DONG, BAO_DUONG
 );
 
 -- 3. Bảng Routes (Các tuyến đường)
@@ -73,6 +76,7 @@ CREATE TABLE HocSinh (
     Lop INT CHECK (Lop BETWEEN 1 AND 5),
     TenTK VARCHAR(50) UNIQUE NOT NULL,
     MatKhau VARCHAR(255) DEFAULT '123',
+    DefaultStopID INT FOREIGN KEY REFERENCES Stops(StopID),
     TrangThai NVARCHAR(20) DEFAULT N'Sử dụng'
 );
 
@@ -85,7 +89,8 @@ CREATE TABLE Schedules (
     BusID INT FOREIGN KEY REFERENCES Buses(BusID),
     DriverID INT FOREIGN KEY REFERENCES Users(UserID),
     MonitorID INT FOREIGN KEY REFERENCES Users(UserID),
-    Status VARCHAR(20) DEFAULT 'PENDING' -- PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+    Status VARCHAR(20) DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+    IncidentStatus VARCHAR(20) DEFAULT 'NORMAL' -- NORMAL, INCIDENT
 );
 
 -- 8. Bảng Attendances (Điểm danh lên/xuống xe)
@@ -100,6 +105,22 @@ CREATE TABLE Attendances (
     Note NVARCHAR(255)
 );
 
+-- 9. Bảng ScheduleProgress (Tiến trình chuyến đi)
+CREATE TABLE ScheduleProgress (
+    ProgressID INT IDENTITY(1,1) PRIMARY KEY,
+    ScheduleID INT FOREIGN KEY REFERENCES Schedules(ScheduleID),
+    StopID INT FOREIGN KEY REFERENCES Stops(StopID),
+    ArrivalTime DATETIME NOT NULL
+);
+
+-- 10. Bảng Notifications (Thông báo)
+CREATE TABLE Notifications (
+    NotifID INT IDENTITY(1,1) PRIMARY KEY,
+    Username VARCHAR(50) FOREIGN KEY REFERENCES Users(Username),
+    Message NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    IsRead BIT DEFAULT 0
+);
 GO
 -- =======================================================
 -- INSERT DỮ LIỆU MẪU (SEED DATA)

@@ -48,6 +48,14 @@ public class UserUpdateServlet extends HttpServlet {
             return;
         }
 
+        if (dao.checkPhoneExist(phone, userID)) {
+            request.setAttribute("error", "Số điện thoại '" + phone + "' đã được người khác sử dụng!");
+            request.setAttribute("userObj", new User(userID, username, password, role, fullName, phone, email, status));
+            request.setAttribute("role", role);
+            request.getRequestDispatcher("user_form.jsp").forward(request, response);
+            return;
+        }
+
         User u = new User(userID, username, password, role, fullName, phone, email, status);
         dao.updateUser(u);
 
