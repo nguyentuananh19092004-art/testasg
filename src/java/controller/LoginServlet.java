@@ -48,6 +48,18 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userRole", role);
             session.setAttribute("username", username);
             
+            model.User user = userDAO.getUserByUsername(username);
+            if (user != null) {
+                session.setAttribute("userID", user.getUserID());
+            } else {
+                // Phụ huynh (HocSinh table)
+                dal.HocSinhDAO hocSinhDAO = new dal.HocSinhDAO();
+                model.HocSinh hs = hocSinhDAO.getHocSinhByTenTK(username);
+                if (hs != null) {
+                    session.setAttribute("userID", hs.getMaHocSinh());
+                }
+            }
+            
             if ("admin".equals(role)) {
                 response.sendRedirect("AdminDashboardServlet");
             } else if ("giamthi".equals(role)) {

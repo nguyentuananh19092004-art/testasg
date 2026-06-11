@@ -31,7 +31,7 @@ public class TechnicianDashboardServlet extends HttpServlet {
         request.setAttribute("incidentSchedules", incidentSchedules);
 
         BusDAO busDAO = new BusDAO();
-        List<Bus> maintenanceBuses = busDAO.getAllBuses().stream().filter(b -> "BAO_DUONG".equals(b.getStatus())).collect(java.util.stream.Collectors.toList());
+        List<Bus> maintenanceBuses = busDAO.getAllBuses().stream().filter(b -> "Bảo dưỡng/Sửa chữa".equals(b.getStatus())).collect(java.util.stream.Collectors.toList());
         request.setAttribute("maintenanceBuses", maintenanceBuses);
         
         Map<Integer, Bus> busMap = new HashMap<>();

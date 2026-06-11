@@ -4,8 +4,8 @@
 <%
     List<User> userList = (List<User>) request.getAttribute("userList");
     String role = (String) request.getAttribute("role");
-    String title = "DRIVER".equals(role) ? "Quản lý Lái xe" : "Quản lý Giám sát";
-    String icon = "DRIVER".equals(role) ? "bi-person-badge" : "bi-eye";
+    String title = "DRIVER".equals(role) ? "Quản lý Lái xe" : ("TECHNICIAN".equals(role) ? "Quản lý Kỹ thuật" : "Quản lý Giám sát");
+    String icon = "DRIVER".equals(role) ? "bi-person-badge" : ("TECHNICIAN".equals(role) ? "bi-wrench" : "bi-eye");
 %>
 <!DOCTYPE html>
 <html>
@@ -24,9 +24,19 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold"><i class="bi <%= icon %> text-primary me-2"></i><%= title %></h2>
-            <div>
-                <a href="user-create?role=<%= role %>" class="btn btn-success me-2"><i class="bi bi-plus-circle"></i> Thêm mới</a>
-                <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+            <div class="d-flex align-items-center">
+                <form action="user-list" method="get" class="d-flex me-3 mb-0">
+                    <input type="hidden" name="role" value="<%= role %>">
+                    <label for="dateFilter" class="me-2 fw-bold mb-0">Xem trạng thái ngày:</label>
+                    <input type="date" id="dateFilter" name="date" class="form-control form-control-sm me-2" style="cursor: pointer;" 
+                           value="<%= request.getAttribute("selectedDate") != null ? request.getAttribute("selectedDate") : java.time.LocalDate.now().toString() %>"
+                           onclick="this.showPicker()"
+                           onchange="this.form.submit()">
+                </form>
+                <div>
+                    <a href="user-create?role=<%= role %>" class="btn btn-success me-2"><i class="bi bi-plus-circle"></i> Thêm mới</a>
+                    <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+                </div>
             </div>
         </div>
         
@@ -54,16 +64,24 @@
                                 <td><%= u.getFullName() %></td>
                                 <td><%= u.getPhone() != null ? u.getPhone() : "" %></td>
                                 <td>
-                                    <% if ("Active".equalsIgnoreCase(u.getStatus()) || "Hoạt động".equalsIgnoreCase(u.getStatus())) { %>
+                                    <% if ("Sẵn sàng".equalsIgnoreCase(u.getStatus())) { %>
+                                        <span class="badge bg-primary">Sẵn sàng</span>
+                                    <% } else if ("Hoạt động".equalsIgnoreCase(u.getStatus())) { %>
                                         <span class="badge bg-success">Hoạt động</span>
-                                    <% } else if ("Rest".equalsIgnoreCase(u.getStatus()) || "Nghỉ".equalsIgnoreCase(u.getStatus())) { %>
+                                    <% } else if ("Nghỉ".equalsIgnoreCase(u.getStatus())) { %>
                                         <span class="badge bg-secondary">Nghỉ</span>
                                     <% } else { %>
-                                        <span class="badge bg-info"><%= u.getStatus() != null ? u.getStatus() : "Active" %></span>
+                                        <span class="badge bg-info"><%= u.getStatus() != null ? u.getStatus() : "Sẵn sàng" %></span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <a href="user-update?id=<%= u.getUserID() %>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Sửa</a>
+                                    <% String selDate = request.getAttribute("selectedDate") != null ? (String)request.getAttribute("selectedDate") : java.time.LocalDate.now().toString(); %>
+                                    <% if ("Sẵn sàng".equalsIgnoreCase(u.getStatus())) { %>
+                                        <a href="daily-status?action=report_leave&type=user&id=<%= u.getUserID() %>&role=<%= role %>&date=<%= selDate %>" class="btn btn-sm btn-warning" onclick="return confirm('Báo nghỉ phép cho nhân sự này trong ngày <%= selDate %>?');"><i class="bi bi-calendar-x"></i> Báo nghỉ</a>
+                                    <% } else if ("Nghỉ".equalsIgnoreCase(u.getStatus())) { %>
+                                        <a href="daily-status?action=cancel_leave&type=user&id=<%= u.getUserID() %>&role=<%= role %>&date=<%= selDate %>" class="btn btn-sm btn-secondary" onclick="return confirm('Hủy báo nghỉ cho nhân sự này trong ngày <%= selDate %>?');"><i class="bi bi-arrow-counterclockwise"></i> Hủy nghỉ</a>
+                                    <% } %>
+                                    <a href="user-update?id=<%= u.getUserID() %>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Sửa gốc</a>
                                     <a href="user-delete?id=<%= u.getUserID() %>&role=<%= role %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân sự này?');"><i class="bi bi-trash"></i> Xóa</a>
                                 </td>
                             </tr>

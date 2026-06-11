@@ -14,9 +14,18 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold"><i class="bi bi-bus-front text-warning me-2"></i>Danh sách Xe Bus</h2>
-            <div>
-                <a href="bus-create" class="btn btn-success me-2"><i class="bi bi-plus-circle"></i> Thêm Xe Bus</a>
-                <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+            <div class="d-flex align-items-center">
+                <form action="bus-list" method="get" class="d-flex me-3 mb-0">
+                    <label for="dateFilter" class="me-2 fw-bold mb-0">Xem trạng thái ngày:</label>
+                    <input type="date" id="dateFilter" name="date" class="form-control form-control-sm me-2" style="cursor: pointer;" 
+                           value="<%= request.getAttribute("selectedDate") != null ? request.getAttribute("selectedDate") : java.time.LocalDate.now().toString() %>"
+                           onclick="this.showPicker()"
+                           onchange="this.form.submit()">
+                </form>
+                <div>
+                    <a href="bus-create" class="btn btn-success me-2"><i class="bi bi-plus-circle"></i> Thêm Xe Bus</a>
+                    <a href="AdminDashboardServlet" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Về Dashboard</a>
+                </div>
             </div>
         </div>
         
@@ -43,18 +52,24 @@
                                 <td class="fw-bold"><%= b.getLicensePlate() %></td>
                                 <td><%= b.getCapacity() %></td>
                                 <td>
-                                    <% if ("Hoạt động".equalsIgnoreCase(b.getStatus()) || "Active".equalsIgnoreCase(b.getStatus())) { %>
+                                    <% if ("Sẵn sàng".equalsIgnoreCase(b.getStatus())) { %>
+                                        <span class="badge bg-primary">Sẵn sàng</span>
+                                    <% } else if ("Hoạt động".equalsIgnoreCase(b.getStatus())) { %>
                                         <span class="badge bg-success">Hoạt động</span>
-                                    <% } else if ("Sửa chữa".equalsIgnoreCase(b.getStatus()) || "Maintenance".equalsIgnoreCase(b.getStatus())) { %>
-                                        <span class="badge bg-danger">Sửa chữa</span>
-                                    <% } else if ("Nghỉ".equalsIgnoreCase(b.getStatus()) || "Rest".equalsIgnoreCase(b.getStatus())) { %>
-                                        <span class="badge bg-secondary">Nghỉ</span>
+                                    <% } else if ("Bảo dưỡng/Sửa chữa".equalsIgnoreCase(b.getStatus())) { %>
+                                        <span class="badge bg-danger">Bảo dưỡng/Sửa chữa</span>
                                     <% } else { %>
-                                        <span class="badge bg-info"><%= b.getStatus() %></span>
+                                        <span class="badge bg-info"><%= b.getStatus() != null ? b.getStatus() : "Sẵn sàng" %></span>
                                     <% } %>
                                 </td>
                                 <td>
-                                    <a href="bus-update?id=<%= b.getBusID() %>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Sửa</a>
+                                    <% String selDate = request.getAttribute("selectedDate") != null ? (String)request.getAttribute("selectedDate") : java.time.LocalDate.now().toString(); %>
+                                    <% if ("Sẵn sàng".equalsIgnoreCase(b.getStatus())) { %>
+                                        <a href="daily-status?action=report_maint&type=bus&id=<%= b.getBusID() %>&date=<%= selDate %>" class="btn btn-sm btn-warning" onclick="return confirm('Báo bảo dưỡng xe này trong ngày <%= selDate %>?');"><i class="bi bi-tools"></i> Báo bảo dưỡng</a>
+                                    <% } else if ("Bảo dưỡng/Sửa chữa".equalsIgnoreCase(b.getStatus())) { %>
+                                        <a href="daily-status?action=cancel_maint&type=bus&id=<%= b.getBusID() %>&date=<%= selDate %>" class="btn btn-sm btn-secondary" onclick="return confirm('Hủy bảo dưỡng xe này trong ngày <%= selDate %>?');"><i class="bi bi-arrow-counterclockwise"></i> Hủy bảo dưỡng</a>
+                                    <% } %>
+                                    <a href="bus-update?id=<%= b.getBusID() %>" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i> Sửa gốc</a>
                                     <a href="bus-delete?id=<%= b.getBusID() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa xe này?');"><i class="bi bi-trash"></i> Xóa</a>
                                 </td>
                             </tr>

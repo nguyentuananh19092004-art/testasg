@@ -11,7 +11,10 @@
     <body>
         <div class="container mt-4">
             <h2>Danh sách Học Sinh</h2>
-            <a href="hocsinh-add" class="btn btn-primary mb-3">Thêm học sinh</a>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="hocsinh-add" class="btn btn-primary">Thêm học sinh</a>
+                <a href="AdminDashboardServlet" class="btn btn-outline-secondary">Về Dashboard</a>
+            </div>
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>

@@ -30,6 +30,41 @@ public class BusDAO extends DBContext {
         return list;
     }
 
+    public List<Bus> getBusesByDate(java.sql.Date date) {
+        List<Bus> list = new ArrayList<>();
+        String sql = "SELECT b.*, " +
+                     "CASE " +
+                     "  WHEN EXISTS (" +
+                     "      SELECT 1 FROM BusMaintenances bm " +
+                     "      WHERE bm.BusID = b.BusID AND bm.MaintenanceDate = ?" +
+                     "  ) THEN N'Bảo dưỡng/Sửa chữa' " +
+                     "  WHEN EXISTS (" +
+                     "      SELECT 1 FROM Schedules s " +
+                     "      WHERE s.Date = ? AND s.BusID = b.BusID" +
+                     "  ) THEN N'Hoạt động' " +
+                     "  ELSE N'Sẵn sàng' " +
+                     "END AS DynamicStatus " +
+                     "FROM Buses b";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setDate(1, date);
+            st.setDate(2, date);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Bus b = new Bus(
+                        rs.getInt("BusID"),
+                        rs.getString("LicensePlate"),
+                        rs.getInt("Capacity"),
+                        rs.getString("DynamicStatus")
+                );
+                list.add(b);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
     public Bus getBusById(int id) {
         String sql = "SELECT * FROM Buses WHERE BusID = ?";
         try {
@@ -98,6 +133,33 @@ public class BusDAO extends DBContext {
             if (rs.next()) {
                 return true;
             }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean insertBusMaintenance(int busID, java.sql.Date date, String description) {
+        String sql = "INSERT INTO BusMaintenances (BusID, MaintenanceDate, Description) VALUES (?, ?, ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, busID);
+            st.setDate(2, date);
+            st.setString(3, description);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean deleteBusMaintenance(int busID, java.sql.Date date) {
+        String sql = "DELETE FROM BusMaintenances WHERE BusID = ? AND MaintenanceDate = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, busID);
+            st.setDate(2, date);
+            return st.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println(e);
         }

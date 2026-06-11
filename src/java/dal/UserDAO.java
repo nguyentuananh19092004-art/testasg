@@ -34,6 +34,46 @@ public class UserDAO extends DBContext {
         }
         return list;
     }
+
+    public List<User> getUsersByRoleAndDate(String role, java.sql.Date date) {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, " +
+                     "CASE " +
+                     "  WHEN EXISTS (" +
+                     "      SELECT 1 FROM UserLeaves ul " +
+                     "      WHERE ul.UserID = u.UserID AND ul.LeaveDate = ? AND ul.Status = 'APPROVED'" +
+                     "  ) THEN N'Nghỉ' " +
+                     "  WHEN EXISTS (" +
+                     "      SELECT 1 FROM Schedules s " +
+                     "      WHERE s.Date = ? AND (s.DriverID = u.UserID OR s.MonitorID = u.UserID)" +
+                     "  ) THEN N'Hoạt động' " +
+                     "  ELSE N'Sẵn sàng' " +
+                     "END AS DynamicStatus " +
+                     "FROM Users u WHERE u.Role = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setDate(1, date);
+            st.setDate(2, date);
+            st.setString(3, role);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                User u = new User(
+                        rs.getInt("UserID"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Role"),
+                        rs.getString("FullName"),
+                        rs.getString("Phone"),
+                        rs.getString("Email"),
+                        rs.getString("DynamicStatus")
+                );
+                list.add(u);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
     public List<User> getAllUsers() {
         List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM Users";
@@ -116,7 +156,7 @@ public class UserDAO extends DBContext {
             st.setString(4, u.getFullName());
             st.setString(5, u.getPhone());
             st.setString(6, u.getEmail());
-            st.setString(7, u.getStatus() == null ? "SAN_SANG" : u.getStatus());
+            st.setString(7, u.getStatus() == null ? "Sẵn sàng" : u.getStatus());
             st.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
@@ -198,6 +238,109 @@ public class UserDAO extends DBContext {
             if (rs.next()) {
                 return true;
             }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean insertUserLeave(int userID, java.sql.Date date, String reason, String status) {
+        String sql = "INSERT INTO UserLeaves (UserID, LeaveDate, Reason, Status) VALUES (?, ?, ?, ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, userID);
+            st.setDate(2, date);
+            st.setString(3, reason);
+            st.setString(4, status);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public String getUsernameById(int userID) {
+        String sql = "SELECT Username FROM Users WHERE UserID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, userID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getString("Username");
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    public List<model.UserLeave> getPendingLeaves() {
+        List<model.UserLeave> list = new ArrayList<>();
+        String sql = "SELECT ul.*, u.FullName, u.Role FROM UserLeaves ul JOIN Users u ON ul.UserID = u.UserID WHERE ul.Status = 'PENDING' ORDER BY ul.CreatedAt DESC";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                model.UserLeave ul = new model.UserLeave(
+                    rs.getInt("LeaveID"),
+                    rs.getInt("UserID"),
+                    rs.getDate("LeaveDate"),
+                    rs.getString("Reason"),
+                    rs.getString("Status"),
+                    rs.getTimestamp("CreatedAt")
+                );
+                ul.setFullName(rs.getString("FullName"));
+                ul.setRole(rs.getString("Role"));
+                list.add(ul);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
+    public boolean updateLeaveStatus(int leaveID, String status) {
+        String sql = "UPDATE UserLeaves SET Status = ? WHERE LeaveID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, status);
+            st.setInt(2, leaveID);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public model.UserLeave getLeaveById(int leaveID) {
+        String sql = "SELECT * FROM UserLeaves WHERE LeaveID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, leaveID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return new model.UserLeave(
+                    rs.getInt("LeaveID"),
+                    rs.getInt("UserID"),
+                    rs.getDate("LeaveDate"),
+                    rs.getString("Reason"),
+                    rs.getString("Status"),
+                    rs.getTimestamp("CreatedAt")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    public boolean deleteUserLeave(int userID, java.sql.Date date) {
+        String sql = "DELETE FROM UserLeaves WHERE UserID = ? AND LeaveDate = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, userID);
+            st.setDate(2, date);
+            return st.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println(e);
         }

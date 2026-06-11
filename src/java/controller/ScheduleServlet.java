@@ -31,14 +31,32 @@ public class ScheduleServlet extends HttpServlet {
             return;
         }
 
+        String action = request.getParameter("action");
+        if ("delete".equals(action)) {
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                ScheduleDAO sDao = new ScheduleDAO();
+                boolean success = sDao.deleteSchedule(id);
+                if (success) {
+                    response.sendRedirect("ScheduleServlet?msg=deleted");
+                } else {
+                    response.sendRedirect("ScheduleServlet?msg=error");
+                }
+                return;
+            } catch (Exception e) {
+                response.sendRedirect("ScheduleServlet?msg=error");
+                return;
+            }
+        }
+
         UserDAO userDAO = new UserDAO();
         BusDAO busDAO = new BusDAO();
         RouteDAO routeDAO = new RouteDAO();
         ScheduleDAO scheduleDAO = new ScheduleDAO();
 
-        List<User> drivers = userDAO.getUsersByRole("DRIVER").stream().filter(u -> "SAN_SANG".equals(u.getStatus())).collect(Collectors.toList());
-        List<User> monitors = userDAO.getUsersByRole("MONITOR").stream().filter(u -> "SAN_SANG".equals(u.getStatus())).collect(Collectors.toList());
-        List<Bus> buses = busDAO.getAllBuses().stream().filter(b -> !"BAO_DUONG".equals(b.getStatus())).collect(Collectors.toList());
+        List<User> drivers = userDAO.getUsersByRole("DRIVER").stream().filter(u -> "Sẵn sàng".equals(u.getStatus())).collect(Collectors.toList());
+        List<User> monitors = userDAO.getUsersByRole("MONITOR").stream().filter(u -> "Sẵn sàng".equals(u.getStatus())).collect(Collectors.toList());
+        List<Bus> buses = busDAO.getAllBuses().stream().filter(b -> !"Bảo dưỡng/Sửa chữa".equals(b.getStatus())).collect(Collectors.toList());
         List<Route> routes = routeDAO.getAllRoutes();
         List<Schedule> schedules = scheduleDAO.getAllSchedules();
 

@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.User"%>
 <%
     User u = (User) request.getAttribute("userObj");
@@ -63,9 +63,9 @@
                             <div class="mb-4">
                                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                                 <select class="form-select" id="status" name="status" required>
-                                    <option value="SAN_SANG" <%= (isEdit && "SAN_SANG".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
-                                    <option value="NGHI" <%= (isEdit && "NGHI".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Nghỉ</option>
-                                    <option value="DANG_TRONG_CA" <%= (isEdit && "DANG_TRONG_CA".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Đang trong ca</option>
+                                    <option value="Sẵn sàng" <%= (isEdit && "Sẵn sàng".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
+                                    <option value="Nghỉ" <%= (isEdit && "Nghỉ".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Nghỉ</option>
+                                    <option value="Hoạt động" <%= (isEdit && "Hoạt động".equalsIgnoreCase(u.getStatus())) ? "selected" : "" %>>Hoạt động</option>
                                 </select>
                             </div>
                             

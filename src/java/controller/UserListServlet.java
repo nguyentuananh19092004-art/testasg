@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 @WebServlet(name = "UserListServlet", urlPatterns = {"/user-list"})
 public class UserListServlet extends HttpServlet {
     @Override
@@ -20,11 +23,20 @@ public class UserListServlet extends HttpServlet {
             role = "DRIVER"; // default
         }
         
+        String dateParam = request.getParameter("date");
+        Date selectedDate;
+        if (dateParam != null && !dateParam.isEmpty()) {
+            selectedDate = Date.valueOf(dateParam);
+        } else {
+            selectedDate = Date.valueOf(LocalDate.now());
+        }
+        
         UserDAO dao = new UserDAO();
-        List<User> userList = dao.getUsersByRole(role);
+        List<User> userList = dao.getUsersByRoleAndDate(role, selectedDate);
         
         request.setAttribute("userList", userList);
         request.setAttribute("role", role);
+        request.setAttribute("selectedDate", selectedDate.toString());
         request.getRequestDispatcher("user_list.jsp").forward(request, response);
     }
 }

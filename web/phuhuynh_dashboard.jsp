@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.*"%>
 <%@page import="java.util.List"%>
 <%
@@ -87,7 +87,7 @@
                                 </div>
                             <% } else { %>
                                 <div class="alert alert-secondary mt-3">
-                                    <i class="bi bi-clock me-2"></i> Hiện không có chuyến xe nào đang hoạt động đi qua điểm đón này.
+                                    <i class="bi bi-clock me-2"></i> Hiện không có chuyến xe nào hoạt động đi qua điểm đón này.
                                 </div>
                             <% } %>
                         <% } %>

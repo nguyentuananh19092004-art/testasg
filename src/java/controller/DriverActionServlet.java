@@ -38,13 +38,13 @@ public class DriverActionServlet extends HttpServlet {
         if ("start_trip".equals(action)) {
             // Update Schedule Status to IN_PROGRESS
             updateScheduleStatus(scheduleID, "IN_PROGRESS", scheduleDAO);
-            // Update Bus Status to DANG_HOAT_DONG
-            updateBusStatus(busID, "DANG_HOAT_DONG", busDAO);
+            // Update Bus Status to Hoạt động
+            updateBusStatus(busID, "Hoạt động", busDAO);
         } else if ("report_incident".equals(action)) {
             // Update Schedule IncidentStatus to INCIDENT
             updateScheduleIncidentStatus(scheduleID, "INCIDENT", scheduleDAO);
-            // Update Bus Status to BAO_DUONG
-            updateBusStatus(busID, "BAO_DUONG", busDAO);
+            // Update Bus Status to Bảo dưỡng/Sửa chữa
+            updateBusStatus(busID, "Bảo dưỡng/Sửa chữa", busDAO);
             
             // Notification can also be sent to Technician here, but UI Dashboard handles reading IncidentStatus.
         }

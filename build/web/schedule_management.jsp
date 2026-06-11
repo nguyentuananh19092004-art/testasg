@@ -35,8 +35,10 @@
 <div class="container">
     <% if("success".equals(request.getParameter("msg"))) { %>
         <div class="alert alert-success">Thêm phân ca thành công!</div>
+    <% } else if("deleted".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-success">Xóa phân ca thành công!</div>
     <% } else if("error".equals(request.getParameter("msg"))) { %>
-        <div class="alert alert-danger">Có lỗi xảy ra khi lưu!</div>
+        <div class="alert alert-danger">Có lỗi xảy ra!</div>
     <% } %>
 
     <div class="row">
@@ -49,8 +51,8 @@
                 <div class="card-body">
                     <form action="ScheduleServlet" method="POST">
                         <div class="mb-3">
-                            <label>Ngày chạy</label>
-                            <input type="date" name="date" class="form-control" required>
+                            <label for="scheduleDate">Ngày chạy</label>
+                            <input type="date" id="scheduleDate" name="date" class="form-control" required style="cursor: pointer;" onclick="this.showPicker()">
                         </div>
                         <div class="mb-3">
                             <label>Chiều đi</label>
@@ -113,6 +115,7 @@
                                 <th>RouteID</th>
                                 <th>BusID</th>
                                 <th>Trạng thái</th>
+                                <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -125,6 +128,11 @@
                                     <td><%= s.getRouteID() %></td>
                                     <td><%= s.getBusID() %></td>
                                     <td><span class="badge bg-warning"><%= s.getStatus() %></span></td>
+                                    <td>
+                                        <a href="ScheduleServlet?action=delete&id=<%= s.getScheduleID() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa lịch phân ca này không?');">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </a>
+                                    </td>
                                 </tr>
                             <% } } %>
                         </tbody>

@@ -36,6 +36,42 @@ public class ScheduleDAO extends DBContext {
         return list;
     }
 
+    public List<Schedule> getSchedulesByUserAndDate(int userID, String role, java.sql.Date date) {
+        List<Schedule> list = new ArrayList<>();
+        String sql = "SELECT * FROM Schedules WHERE Date = ? ";
+        if ("taixe".equals(role)) {
+            sql += "AND DriverID = ?";
+        } else if ("giamthi".equals(role)) {
+            sql += "AND MonitorID = ?";
+        } else {
+            return list;
+        }
+        
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setDate(1, date);
+            st.setInt(2, userID);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Schedule s = new Schedule(
+                    rs.getInt("ScheduleID"),
+                    rs.getDate("Date"),
+                    rs.getString("Direction"),
+                    rs.getInt("RouteID"),
+                    rs.getInt("BusID"),
+                    rs.getInt("DriverID"),
+                    rs.getInt("MonitorID"),
+                    rs.getString("Status"),
+                    rs.getString("IncidentStatus")
+                );
+                list.add(s);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
     public boolean insertSchedule(Schedule s) {
         String sql = "INSERT INTO Schedules (Date, Direction, RouteID, BusID, DriverID, MonitorID, Status, IncidentStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
@@ -157,5 +193,41 @@ public class ScheduleDAO extends DBContext {
             System.out.println(e);
         }
         return null;
+    }
+
+    public boolean deleteSchedule(int id) {
+        String deleteAttendances = "DELETE FROM Attendances WHERE ScheduleID = ?";
+        String deleteProgress = "DELETE FROM ScheduleProgress WHERE ScheduleID = ?";
+        String deleteSchedule = "DELETE FROM Schedules WHERE ScheduleID = ?";
+        try {
+            connection.setAutoCommit(false);
+            
+            // Delete dependent records first
+            PreparedStatement st1 = connection.prepareStatement(deleteAttendances);
+            st1.setInt(1, id);
+            st1.executeUpdate();
+            
+            PreparedStatement st2 = connection.prepareStatement(deleteProgress);
+            st2.setInt(1, id);
+            st2.executeUpdate();
+            
+            // Delete main record
+            PreparedStatement st3 = connection.prepareStatement(deleteSchedule);
+            st3.setInt(1, id);
+            int rows = st3.executeUpdate();
+            
+            connection.commit();
+            connection.setAutoCommit(true);
+            return rows > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            try {
+                connection.rollback();
+                connection.setAutoCommit(true);
+            } catch (SQLException ex) {
+                System.out.println(ex);
+            }
+        }
+        return false;
     }
 }

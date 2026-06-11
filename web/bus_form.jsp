@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.Bus"%>
 <%
     Bus bus = (Bus) request.getAttribute("bus");
@@ -51,9 +51,9 @@
                             <div class="mb-4">
                                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                                 <select class="form-select" id="status" name="status" required>
-                                    <option value="SAN_SANG" <%= (isEdit && "SAN_SANG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
-                                    <option value="DANG_HOAT_DONG" <%= (isEdit && "DANG_HOAT_DONG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Đang hoạt động</option>
-                                    <option value="BAO_DUONG" <%= (isEdit && "BAO_DUONG".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sửa chữa/Bảo dưỡng</option>
+                                    <option value="Sẵn sàng" <%= (isEdit && "Sẵn sàng".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
+                                    <option value="Hoạt động" <%= (isEdit && "Hoạt động".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Hoạt động</option>
+                                    <option value="Bảo dưỡng/Sửa chữa" <%= (isEdit && "Bảo dưỡng/Sửa chữa".equalsIgnoreCase(bus.getStatus())) ? "selected" : "" %>>Sửa chữa/Bảo dưỡng</option>
                                 </select>
                             </div>
                             

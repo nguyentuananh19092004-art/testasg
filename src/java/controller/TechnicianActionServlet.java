@@ -41,7 +41,7 @@ public class TechnicianActionServlet extends HttpServlet {
         } else if ("finish_maintenance".equals(action)) {
             int busID = Integer.parseInt(request.getParameter("busID"));
             BusDAO dao = new BusDAO();
-            String sql = "UPDATE Buses SET Status = 'SAN_SANG' WHERE BusID = ?";
+            String sql = "UPDATE Buses SET Status = N'Sẵn sàng' WHERE BusID = ?";
             try {
                 PreparedStatement st = dao.getConnection().prepareStatement(sql);
                 st.setInt(1, busID);

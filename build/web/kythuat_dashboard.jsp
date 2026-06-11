@@ -104,6 +104,23 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h5 class="fw-bold"><i class="bi bi-grid-fill me-2 text-primary"></i>Chức năng</h5>
+                    </div>
+                    <div class="card-body pt-4 pb-4">
+                        <a href="employee-schedule" class="btn btn-outline-primary btn-lg me-3 mb-3 px-4">
+                            <i class="bi bi-calendar3 me-2"></i> Lịch làm việc
+                        </a>
+                        <a href="employee-inbox" class="btn btn-outline-danger btn-lg mb-3 px-4 position-relative">
+                            <i class="bi bi-envelope-paper me-2"></i> Hòm thư & Nghỉ phép
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
