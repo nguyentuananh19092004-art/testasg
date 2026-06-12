@@ -39,9 +39,9 @@ public class ScheduleDAO extends DBContext {
     public List<Schedule> getSchedulesByUserAndDate(int userID, String role, java.sql.Date date) {
         List<Schedule> list = new ArrayList<>();
         String sql = "SELECT * FROM Schedules WHERE Date = ? ";
-        if ("taixe".equals(role)) {
+        if ("taixe".equals(role) || "DRIVER".equals(role)) {
             sql += "AND DriverID = ?";
-        } else if ("giamthi".equals(role)) {
+        } else if ("giamthi".equals(role) || "MONITOR".equals(role)) {
             sql += "AND MonitorID = ?";
         } else {
             return list;
@@ -90,6 +90,25 @@ public class ScheduleDAO extends DBContext {
             System.out.println(e);
             return false;
         }
+    }
+
+    public boolean isConflict(Date date, String direction, int driverID, int monitorID, int busID) {
+        String sql = "SELECT COUNT(*) FROM Schedules WHERE Date = ? AND Direction = ? AND (DriverID = ? OR MonitorID = ? OR BusID = ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setDate(1, date);
+            st.setString(2, direction);
+            st.setInt(3, driverID);
+            st.setInt(4, monitorID);
+            st.setInt(5, busID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
     }
 
     public Schedule getActiveScheduleByMonitor(int monitorID) {
@@ -227,6 +246,20 @@ public class ScheduleDAO extends DBContext {
             } catch (SQLException ex) {
                 System.out.println(ex);
             }
+        }
+        return false;
+    }
+
+    public boolean updateSchedulePersonnel(int scheduleID, String role, int newUserID) {
+        String column = ("taixe".equals(role) || "DRIVER".equals(role)) ? "DriverID" : "MonitorID";
+        String sql = "UPDATE Schedules SET " + column + " = ? WHERE ScheduleID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, newUserID);
+            st.setInt(2, scheduleID);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
         }
         return false;
     }

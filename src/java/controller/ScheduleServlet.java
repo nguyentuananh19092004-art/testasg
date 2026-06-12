@@ -82,8 +82,14 @@ public class ScheduleServlet extends HttpServlet {
             int driverID = Integer.parseInt(request.getParameter("driverID"));
             int monitorID = Integer.parseInt(request.getParameter("monitorID"));
 
-            Schedule s = new Schedule(0, date, direction, routeID, busID, driverID, monitorID, "PENDING", "NORMAL");
             ScheduleDAO dao = new ScheduleDAO();
+
+            if (dao.isConflict(date, direction, driverID, monitorID, busID)) {
+                response.sendRedirect("ScheduleServlet?msg=conflict");
+                return;
+            }
+
+            Schedule s = new Schedule(0, date, direction, routeID, busID, driverID, monitorID, "PENDING", "NORMAL");
             boolean success = dao.insertSchedule(s);
 
             if (success) {

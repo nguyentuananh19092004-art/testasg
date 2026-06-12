@@ -63,13 +63,13 @@ public class LoginServlet extends HttpServlet {
             if ("admin".equals(role)) {
                 response.sendRedirect("AdminDashboardServlet");
             } else if ("giamthi".equals(role)) {
-                response.sendRedirect("giamthi_dashboard.jsp");
+                response.sendRedirect("monitor-dashboard");
             } else if ("phuhuynh".equals(role)) {
-                response.sendRedirect("phuhuynh_dashboard.jsp");
+                response.sendRedirect("parent-dashboard");
             } else if ("taixe".equals(role)) {
-                response.sendRedirect("taixe_dashboard.jsp");
+                response.sendRedirect("driver-dashboard");
             } else if ("kythuat".equals(role)) {
-                response.sendRedirect("kythuat_dashboard.jsp");
+                response.sendRedirect("technician-dashboard");
             } else {
                 response.sendRedirect("index.jsp");
             }

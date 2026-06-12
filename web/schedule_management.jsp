@@ -15,6 +15,32 @@
     List<Route> routes = (List<Route>) request.getAttribute("routes");
     List<Schedule> schedules = (List<Schedule>) request.getAttribute("schedules");
 %>
+<%!
+    String getBusPlate(List<Bus> buses, int id) {
+        if (buses != null) {
+            for (Bus b : buses) {
+                if (b.getBusID() == id) return b.getLicensePlate();
+            }
+        }
+        return "Unknown";
+    }
+    String getUserName(List<User> users, int id) {
+        if (users != null) {
+            for (User u : users) {
+                if (u.getUserID() == id) return u.getFullName();
+            }
+        }
+        return "Unknown";
+    }
+    String getRouteName(List<Route> routes, int id) {
+        if (routes != null) {
+            for (Route r : routes) {
+                if (r.getRouteID() == id) return r.getRouteName();
+            }
+        }
+        return "Unknown";
+    }
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -34,11 +60,16 @@
 
 <div class="container">
     <% if("success".equals(request.getParameter("msg"))) { %>
-        <div class="alert alert-success">Thêm phân ca thành công!</div>
+        <div class="alert alert-success alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Thêm phân ca thành công!</div>
     <% } else if("deleted".equals(request.getParameter("msg"))) { %>
-        <div class="alert alert-success">Xóa phân ca thành công!</div>
+        <div class="alert alert-success alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Xóa phân ca thành công!</div>
+    <% } else if("conflict".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Cảnh báo:</strong> Xe bus, Tài xế, hoặc Giám thị này đã được phân công vào ca này rồi! Bạn không thể phân công trùng lặp.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     <% } else if("error".equals(request.getParameter("msg"))) { %>
-        <div class="alert alert-danger">Có lỗi xảy ra!</div>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Có lỗi xảy ra!</div>
     <% } %>
 
     <div class="row">
@@ -105,15 +136,17 @@
                 <div class="card-header bg-white">
                     <h5 class="mb-0">Danh sách Phân ca</h5>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover table-striped mb-0">
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-hover table-striped mb-0 text-nowrap">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
                                 <th>Ngày</th>
                                 <th>Chiều</th>
-                                <th>RouteID</th>
-                                <th>BusID</th>
+                                <th>Tuyến</th>
+                                <th>Xe Bus</th>
+                                <th>Tài xế</th>
+                                <th>Giám thị</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
@@ -125,8 +158,10 @@
                                     <td>#<%= s.getScheduleID() %></td>
                                     <td><%= s.getDate() %></td>
                                     <td><%= s.getDirection().equals("TO_SCHOOL") ? "Đến trường" : "Về nhà" %></td>
-                                    <td><%= s.getRouteID() %></td>
-                                    <td><%= s.getBusID() %></td>
+                                    <td>LT<%= s.getRouteID() %></td>
+                                    <td><%= getBusPlate(buses, s.getBusID()) %></td>
+                                    <td><%= getUserName(drivers, s.getDriverID()) %></td>
+                                    <td><%= getUserName(monitors, s.getMonitorID()) %></td>
                                     <td><span class="badge bg-warning"><%= s.getStatus() %></span></td>
                                     <td>
                                         <a href="ScheduleServlet?action=delete&id=<%= s.getScheduleID() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa lịch phân ca này không?');">

@@ -49,6 +49,9 @@ public class MonitorDashboardServlet extends HttpServlet {
 
                 StopDAO stopDAO = new StopDAO();
                 List<Stop> stops = stopDAO.getStopsByRoute(activeSchedule.getRouteID());
+                if ("Về nhà".equals(activeSchedule.getDirection())) {
+                    java.util.Collections.reverse(stops);
+                }
                 request.setAttribute("stops", stops);
 
                 HocSinhDAO hsDAO = new HocSinhDAO();

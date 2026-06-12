@@ -68,12 +68,13 @@
                         <hr>
                         <h6 class="fw-bold mb-3">Lộ trình và Danh sách điểm đón:</h6>
                         <% if (stops != null && !stops.isEmpty()) { 
+                            boolean isReturn = "Về nhà".equals(schedule.getDirection());
                             for (Stop s : stops) { 
                                 boolean isReached = reachedStops != null && reachedStops.contains(s.getStopID());
                         %>
                         <div class="stop-item <%= isReached ? "stop-reached" : "" %>">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="fw-bold mb-0 text-primary"><%= s.getStopName() %> <small class="text-muted">(<%= s.getEstimatedTime() %>)</small></h6>
+                                <h6 class="fw-bold mb-0 text-primary"><%= s.getStopName() %> <small class="text-muted">(<%= isReturn ? s.getReturnTime() : s.getEstimatedTime() %>)</small></h6>
                                 <% if (!isReached) { %>
                                 <form action="monitor-action" method="POST" class="m-0">
                                     <input type="hidden" name="action" value="reach_stop">
@@ -89,7 +90,7 @@
                             
                             <!-- Danh sách học sinh tại điểm này -->
                             <div class="bg-light p-3 rounded">
-                                <strong><i class="bi bi-people me-1"></i> Học sinh lên xe:</strong>
+                                <strong><i class="bi bi-people me-1"></i> <%= isReturn ? "Học sinh xuống xe:" : "Học sinh lên xe:" %></strong>
                                 <% List<HocSinh> hsList = studentsByStop.get(s.getStopID());
                                    if (hsList != null && !hsList.isEmpty()) { %>
                                    <ul class="list-unstyled mt-2 mb-0">
