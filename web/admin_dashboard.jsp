@@ -140,6 +140,7 @@
                         <a href="hocsinh-list" class="btn btn-outline-primary me-2 mb-2"><i class="bi bi-person-lines-fill me-1"></i> Quản lý Học Sinh</a>
                         <a href="ScheduleServlet" class="btn btn-outline-success me-2 mb-2"><i class="bi bi-calendar-check me-1"></i> Phân ca & Lịch trình</a>
                         <a href="bus-list" class="btn btn-outline-warning me-2 mb-2"><i class="bi bi-bus-front me-1"></i> Quản lý Xe Bus</a>
+                        <a href="route-management" class="btn btn-outline-primary me-2 mb-2"><i class="bi bi-map-fill me-1"></i> Quản lý Lộ trình</a>
                         <a href="user-list?role=DRIVER" class="btn btn-outline-info me-2 mb-2"><i class="bi bi-person-vcard me-1"></i> Quản lý Lái xe</a>
                         <a href="user-list?role=MONITOR" class="btn btn-outline-dark me-2 mb-2"><i class="bi bi-eye-fill me-1"></i> Quản lý Giám sát</a>
                         <a href="user-list?role=TECHNICIAN" class="btn btn-outline-secondary me-2 mb-2"><i class="bi bi-tools me-1"></i> Quản lý Kỹ thuật</a>

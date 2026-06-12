@@ -59,4 +59,53 @@ public class StopDAO extends DBContext {
         }
         return list;
     }
+
+    public int insertStop(Stop s) {
+        String sql = "INSERT INTO Stops (StopName, Address, Latitude, Longitude) VALUES (?, ?, ?, ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            st.setString(1, s.getStopName());
+            st.setString(2, s.getAddress());
+            st.setDouble(3, s.getLatitude());
+            st.setDouble(4, s.getLongitude());
+            st.executeUpdate();
+            ResultSet rs = st.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return -1;
+    }
+
+    public int getMaxStopOrder(int routeID) {
+        String sql = "SELECT MAX(StopOrder) FROM RouteStops WHERE RouteID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, routeID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return 0;
+    }
+
+    public void addStopToRoute(int routeID, int stopID, int stopOrder, String estimatedTime, String returnTime) {
+        String sql = "INSERT INTO RouteStops (RouteID, StopID, StopOrder, EstimatedTime, ReturnTime) VALUES (?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, routeID);
+            st.setInt(2, stopID);
+            st.setInt(3, stopOrder);
+            st.setString(4, estimatedTime);
+            st.setString(5, returnTime);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
 }

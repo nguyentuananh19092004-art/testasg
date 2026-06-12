@@ -142,14 +142,7 @@ CREATE TABLE ScheduleProgress (
     ArrivalTime DATETIME NOT NULL
 );
 
--- 10. Bảng Notifications (Thông báo)
-CREATE TABLE Notifications (
-    NotifID INT IDENTITY(1,1) PRIMARY KEY,
-    Username VARCHAR(50) FOREIGN KEY REFERENCES Users(Username),
-    Message NVARCHAR(255) NOT NULL,
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    IsRead BIT DEFAULT 0
-);
+
 GO
 -- =======================================================
 -- INSERT DỮ LIỆU MẪU (SEED DATA)
@@ -307,34 +300,34 @@ INSERT INTO Routes (RouteCode, RouteName) VALUES
 ('LT6', N'Victory Văn Phú -> Matrix One -> Trường học');
 
 -- 4. Insert Stops (Chỉ bao gồm các điểm đón học sinh và Trường học, bỏ qua các tuyến đường đi qua)
-INSERT INTO Stops (StopName) VALUES
-(N'S2.15 (Ocean Park)'),          -- 1
-(N'S1.08 (Ocean Park)'),          -- 2
-(N'The Zen Gamuda'),              -- 3
-(N'LandMark 72'),                 -- 4
-(N'Trường Marie Curie'),          -- 5
-(N'VinCom Long Biên'),            -- 6
-(N'H3 Chu Huy Mân'),              -- 7
-(N'423 Minh Khai'),               -- 8
-(N'VinCom TimesCity'),            -- 9
-(N'Royal City'),                  -- 10
-(N'Vincom Metropolis'),           -- 11
-(N'VinCom Nguyễn Chí Thanh'),     -- 12
-(N'N03-T1 Minh Tảo'),             -- 13
-(N'N01-T6'),                      -- 14
-(N'6th elements'),                -- 15
-(N'Tòa N02, Ecohome 3'),          -- 16
-(N'27A2 thành phố giao lưu'),     -- 17
-(N'R1 GoldMark City'),            -- 18
-(N'A1 Vinhome gardenia'),         -- 19
-(N'V3 Victory Văn Phú'),          -- 20
-(N'P2 ParkCity'),                 -- 21
-(N'C16 Gleximco'),                -- 22
-(N'A32 Gleximco'),                -- 23
-(N'GS1 SmartCity'),               -- 24
-(N'S401 SmartCity'),              -- 25
-(N'Mỹ Đình Pearl'),               -- 26
-(N'Matrix One');                  -- 27
+INSERT INTO Stops (StopName, Latitude, Longitude) VALUES
+(N'S2.15 (Ocean Park)', 20.9934, 105.9427),          -- 1
+(N'S1.08 (Ocean Park)', 20.9980, 105.9450),          -- 2
+(N'The Zen Gamuda', 20.9658, 105.8679),              -- 3
+(N'LandMark 72', 21.0173, 105.7841),                 -- 4
+(N'Trường Marie Curie', 21.0175, 105.7808),          -- 5
+(N'VinCom Long Biên', 21.0401, 105.9189),            -- 6
+(N'H3 Chu Huy Mân', 21.0345, 105.9123),              -- 7
+(N'423 Minh Khai', 20.9981, 105.8654),               -- 8
+(N'VinCom TimesCity', 20.9954, 105.8675),            -- 9
+(N'Royal City', 21.0028, 105.8155),                  -- 10
+(N'Vincom Metropolis', 21.0317, 105.8143),           -- 11
+(N'VinCom Nguyễn Chí Thanh', 21.0244, 105.8088),     -- 12
+(N'N03-T1 Minh Tảo', 21.0664, 105.7950),             -- 13
+(N'N01-T6', 21.0682, 105.7941),                      -- 14
+(N'6th elements', 21.0573, 105.8005),                -- 15
+(N'Tòa N02, Ecohome 3', 21.0772, 105.7831),          -- 16
+(N'27A2 thành phố giao lưu', 21.0543, 105.7803),     -- 17
+(N'R1 GoldMark City', 21.0396, 105.7656),            -- 18
+(N'A1 Vinhome gardenia', 21.0342, 105.7635),         -- 19
+(N'V3 Victory Văn Phú', 20.9572, 105.7644),          -- 20
+(N'P2 ParkCity', 20.9665, 105.7533),                 -- 21
+(N'C16 Gleximco', 20.9882, 105.7421),                -- 22
+(N'A32 Gleximco', 20.9950, 105.7455),                -- 23
+(N'GS1 SmartCity', 21.0084, 105.7483),               -- 24
+(N'S401 SmartCity', 21.0062, 105.7451),              -- 25
+(N'Mỹ Đình Pearl', 21.0093, 105.7744),               -- 26
+(N'Matrix One', 21.0116, 105.7766);                  -- 27
 
 -- 5. Insert RouteStops
 -- Tuyến LT1
