@@ -7,18 +7,20 @@ public class HocSinh {
     private String tenTK;
     private String matKhau;
     private Integer defaultStopID;
+    private Integer defaultRouteID;
     private String trangThai;
 
     public HocSinh() {
     }
 
-    public HocSinh(String maHocSinh, String tenHocSinh, int lop, String tenTK, String matKhau, Integer defaultStopID, String trangThai) {
+    public HocSinh(String maHocSinh, String tenHocSinh, int lop, String tenTK, String matKhau, Integer defaultStopID, Integer defaultRouteID, String trangThai) {
         this.maHocSinh = maHocSinh;
         this.tenHocSinh = tenHocSinh;
         this.lop = lop;
         this.tenTK = tenTK;
         this.matKhau = matKhau;
         this.defaultStopID = defaultStopID;
+        this.defaultRouteID = defaultRouteID;
         this.trangThai = trangThai;
     }
 
@@ -68,6 +70,14 @@ public class HocSinh {
 
     public void setDefaultStopID(Integer defaultStopID) {
         this.defaultStopID = defaultStopID;
+    }
+
+    public Integer getDefaultRouteID() {
+        return defaultRouteID;
+    }
+
+    public void setDefaultRouteID(Integer defaultRouteID) {
+        this.defaultRouteID = defaultRouteID;
     }
 
     public String getTrangThai() {

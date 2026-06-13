@@ -1,9 +1,9 @@
-﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.User"%>
 <%
     User u = (User) request.getAttribute("userObj");
     String role = (String) request.getAttribute("role");
-    boolean isEdit = (u != null);
+    boolean isEdit = (u != null && u.getUserID() != 0);
     String titleRole = "DRIVER".equals(role) ? "Lái xe" : ("TECHNICIAN".equals(role) ? "Kỹ thuật" : "Giám sát");
 %>
 <!DOCTYPE html>

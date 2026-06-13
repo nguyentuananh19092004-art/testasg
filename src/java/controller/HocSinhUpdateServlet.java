@@ -50,8 +50,9 @@ public class HocSinhUpdateServlet extends HttpServlet {
 
         HocSinh oldHs = dao.getHocSinhByMa(maHocSinh);
         Integer defaultStopID = oldHs != null ? oldHs.getDefaultStopID() : null;
+        Integer defaultRouteID = oldHs != null ? oldHs.getDefaultRouteID() : null;
 
-        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, defaultStopID, trangThai);
+        HocSinh hs = new HocSinh(maHocSinh, tenHocSinh, lop, tenTK, matKhau, defaultStopID, defaultRouteID, trangThai);
         dao.updateHocSinh(hs);
 
         response.sendRedirect("hocsinh-list");

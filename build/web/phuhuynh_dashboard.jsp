@@ -1,4 +1,4 @@
-﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.*"%>
 <%@page import="java.util.List"%>
 <%
@@ -7,7 +7,7 @@
         return;
     }
     HocSinh student = (HocSinh) request.getAttribute("student");
-    List<Stop> allStops = (List<Stop>) request.getAttribute("allStops");
+    List<StopRouteOption> stopRouteOptions = (List<StopRouteOption>) request.getAttribute("stopRouteOptions");
     Stop currentStop = (Stop) request.getAttribute("currentStop");
     Schedule activeSchedule = (Schedule) request.getAttribute("activeSchedule");
     List<Notification> notifications = (List<Notification>) request.getAttribute("notifications");
@@ -56,9 +56,13 @@
                             <div class="alert alert-danger">
                                 <i class="bi bi-info-circle-fill me-2"></i> Gia đình đã báo cho học sinh nghỉ ngày hôm nay.
                             </div>
+                        <% } else if ("Ngưng hoạt động".equals(student.getTrangThai()) || student.getDefaultStopID() == null) { %>
+                            <div class="alert alert-secondary">
+                                <i class="bi bi-exclamation-circle-fill me-2 text-warning"></i> Trạng thái: <strong>Chưa kích hoạt</strong>. Vui lòng thiết lập Điểm đón và Khung giờ ở bên dưới để đăng ký sử dụng dịch vụ xe Bus.
+                            </div>
                         <% } else { %>
                             <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-2"></i> Học sinh đi học bình thường.
+                                <i class="bi bi-check-circle-fill me-2"></i> Trạng thái: Hoạt động. Học sinh đi học bình thường.
                             </div>
                             <form action="parent-action" method="POST" class="mt-3">
                                 <input type="hidden" name="action" value="report_absent">
@@ -105,13 +109,18 @@
                         <form action="parent-action" method="POST">
                             <input type="hidden" name="action" value="change_stop">
                             <div class="mb-3">
-                                <label for="stopID" class="form-label">Chọn điểm đón/trả:</label>
-                                <select class="form-select" name="stopID" id="stopID" required>
-                                    <option value="">-- Chọn điểm đón --</option>
-                                    <% if (allStops != null) {
-                                        for (Stop s : allStops) { %>
-                                            <option value="<%= s.getStopID() %>" <%= (currentStop != null && currentStop.getStopID() == s.getStopID()) ? "selected" : "" %>>
-                                                <%= s.getStopName() %> (<%= s.getAddress() %>)
+                                <label for="stopRoute" class="form-label">Chọn Điểm đón & Khung giờ (Tuyến):</label>
+                                <select class="form-select" name="stopRoute" id="stopRoute" required>
+                                    <option value="">-- Chọn điểm đón và giờ --</option>
+                                    <% if (stopRouteOptions != null) {
+                                        for (StopRouteOption sro : stopRouteOptions) { 
+                                            String val = sro.getStopID() + "_" + sro.getRouteID();
+                                            boolean isSelected = (student.getDefaultStopID() != null && student.getDefaultRouteID() != null && 
+                                                                  student.getDefaultStopID() == sro.getStopID() && 
+                                                                  student.getDefaultRouteID() == sro.getRouteID());
+                                    %>
+                                            <option value="<%= val %>" <%= isSelected ? "selected" : "" %>>
+                                                <%= sro.getStopName() %> - Tuyến: <%= sro.getRouteName() %> (Đón: <%= sro.getEstimatedTime().toString().substring(0,5) %>, Trả: <%= sro.getReturnTime() != null ? sro.getReturnTime().toString().substring(0,5) : "--" %>)
                                             </option>
                                     <%  } 
                                        } %>

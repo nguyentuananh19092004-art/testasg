@@ -15,7 +15,7 @@ public class StopDAO extends DBContext {
                      "FROM Stops s " +
                      "JOIN RouteStops rs ON s.StopID = rs.StopID " +
                      "WHERE rs.RouteID = ? " +
-                     "ORDER BY rs.StopOrder";
+                     "ORDER BY rs.EstimatedTime ASC";
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setInt(1, routeID);
@@ -103,6 +103,19 @@ public class StopDAO extends DBContext {
             st.setInt(3, stopOrder);
             st.setString(4, estimatedTime);
             st.setString(5, returnTime);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+    public void updateRouteStopTime(int routeID, int stopID, String estimatedTime, String returnTime) {
+        String sql = "UPDATE RouteStops SET EstimatedTime = ?, ReturnTime = ? WHERE RouteID = ? AND StopID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, estimatedTime);
+            st.setString(2, returnTime);
+            st.setInt(3, routeID);
+            st.setInt(4, stopID);
             st.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);

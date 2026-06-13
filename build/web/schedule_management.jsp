@@ -14,6 +14,8 @@
     List<Bus> buses = (List<Bus>) request.getAttribute("buses");
     List<Route> routes = (List<Route>) request.getAttribute("routes");
     List<Schedule> schedules = (List<Schedule>) request.getAttribute("schedules");
+    List<User> technicians = (List<User>) request.getAttribute("technicians");
+    List<model.TechnicianSchedule> techSchedules = (List<model.TechnicianSchedule>) request.getAttribute("techSchedules");
 %>
 <%!
     String getBusPlate(List<Bus> buses, int id) {
@@ -70,6 +72,38 @@
         </div>
     <% } else if("error".equals(request.getParameter("msg"))) { %>
         <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Có lỗi xảy ra!</div>
+    <% } else if("tech_success".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-success alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Phân ca kỹ thuật thành công!</div>
+    <% } else if("tech_deleted".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-success alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Xóa ca kỹ thuật thành công!</div>
+    <% } else if("tech_conflict".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-warning alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Lỗi: Kỹ thuật viên này đã được phân công vào ngày này rồi!</div>
+    <% } else if("tech_error".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>Có lỗi xảy ra khi xử lý ca kỹ thuật!</div>
+    <% } else if("past_date".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân ca cho ngày trong quá khứ!</div>
+    <% } else if("timeout_school".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Đã quá 6h sáng, không thể phân ca chiều đi (Đến trường) cho ngày hôm nay nữa!</div>
+    <% } else if("timeout_home".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Đã quá 16h (4h chiều), không thể phân ca chiều về (Về nhà) cho ngày hôm nay nữa!</div>
+    <% } else if("tech_past_date".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân ca kỹ thuật cho ngày hôm trước!</div>
+    <% } %>
+
+    <% java.util.List<String> capacityWarnings = (java.util.List<String>) request.getAttribute("capacityWarnings"); 
+       if (capacityWarnings != null && !capacityWarnings.isEmpty()) { %>
+        <div class="card shadow-sm border-danger mb-4">
+            <div class="card-header bg-danger text-white fw-bold">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Bảng Cảnh Báo & Đề Xuất Phân Xe Hôm Nay
+            </div>
+            <div class="card-body bg-light">
+                <ul class="mb-0 text-danger fw-bold">
+                    <% for (String warning : capacityWarnings) { %>
+                        <li><%= warning %></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
     <% } %>
 
     <div class="row">
@@ -95,8 +129,11 @@
                         <div class="mb-3">
                             <label>Tuyến đường</label>
                             <select name="routeID" class="form-select">
-                                <% if(routes != null) for(Route r : routes) { %>
-                                    <option value="<%= r.getRouteID() %>"><%= r.getRouteName() %></option>
+                                <% java.util.Map<Integer, Integer> routeStudentCounts = (java.util.Map<Integer, Integer>) request.getAttribute("routeStudentCounts"); %>
+                                <% if(routes != null) for(Route r : routes) { 
+                                    int c = routeStudentCounts != null && routeStudentCounts.containsKey(r.getRouteID()) ? routeStudentCounts.get(r.getRouteID()) : 0;
+                                %>
+                                    <option value="<%= r.getRouteID() %>"><%= r.getRouteName() %> (Đang có <%= c %> học sinh)</option>
                                 <% } %>
                             </select>
                         </div>
@@ -170,6 +207,84 @@
                                     </td>
                                 </tr>
                             <% } } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân ca Kỹ thuật -->
+    <hr class="my-5">
+    <h4 class="mb-4 text-secondary"><i class="bi bi-tools me-2"></i>Phân ca Kỹ thuật viên (Xưởng bảo dưỡng)</h4>
+    <div class="row">
+        <!-- Form Kỹ thuật -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <h5 class="mb-0">Thêm Ca Kỹ Thuật</h5>
+                </div>
+                <div class="card-body">
+                    <form action="tech-schedule" method="POST">
+                        <input type="hidden" name="action" value="add">
+                        <div class="mb-3">
+                            <label for="techDate">Ngày làm việc</label>
+                            <input type="date" id="techDate" name="date" class="form-control" required style="cursor: pointer;" onclick="this.showPicker()">
+                        </div>
+                        <div class="mb-4">
+                            <label>Kỹ thuật viên</label>
+                            <select name="technicianID" class="form-select" required>
+                                <% if(technicians != null) for(User t : technicians) { %>
+                                    <option value="<%= t.getUserID() %>"><%= t.getFullName() %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 fw-bold"><i class="bi bi-plus-circle me-1"></i> Lưu ca Kỹ thuật</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách ca kỹ thuật -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Danh sách Ca Kỹ thuật</h5>
+                </div>
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-hover table-striped mb-0 text-nowrap">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID Ca</th>
+                                <th>Ngày làm việc</th>
+                                <th>Tên Kỹ thuật viên</th>
+                                <th>Ngày tạo</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(techSchedules != null && !techSchedules.isEmpty()) { 
+                                for(model.TechnicianSchedule ts : techSchedules) { %>
+                                <tr>
+                                    <td>#<%= ts.getTechScheduleID() %></td>
+                                    <td class="fw-bold text-primary"><%= ts.getDate() %></td>
+                                    <td><%= ts.getTechnicianName() %></td>
+                                    <td class="text-muted"><%= new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(ts.getCreatedAt()) %></td>
+                                    <td>
+                                        <form action="tech-schedule" method="POST" style="display:inline;">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<%= ts.getTechScheduleID() %>">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa ca kỹ thuật này?');">
+                                                <i class="bi bi-trash"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% } } else { %>
+                                <tr>
+                                    <td colspan="5" class="text-center py-3 text-muted">Chưa có lịch phân ca kỹ thuật nào.</td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>

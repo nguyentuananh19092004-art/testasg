@@ -188,13 +188,12 @@
                 <!-- Modal Thêm Trạm Mới -->
                 <div class="modal fade" id="addStopModal" tabindex="-1" aria-labelledby="addStopModalLabel" aria-hidden="true">
                   <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
+                    <form action="add-stop" method="POST" class="modal-content">
                       <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title fw-bold" id="addStopModalLabel"><i class="bi bi-pin-map-fill me-2"></i>Thêm Điểm Dừng Mới</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
-                      <form action="add-stop" method="POST" class="d-flex flex-column h-100 w-100">
-                          <div class="modal-body">
+                      <div class="modal-body">
                               <input type="hidden" name="routeID" value="<%= selectedRoute.getRouteID() %>">
                               <input type="hidden" name="latitude" id="latInput">
                               <input type="hidden" name="longitude" id="lngInput">
@@ -223,13 +222,47 @@
                                   <div id="miniMap" style="height: 250px; border-radius: 8px; border: 1px solid #ccc;"></div>
                                   <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i>Bạn có thể kéo thả ghim màu đỏ trên bản đồ để căn chỉnh vị trí chính xác nhất.</small>
                               </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Lưu Trạm</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Modal Sửa Thời Gian Trạm -->
+                <div class="modal fade" id="editStopModal" tabindex="-1" aria-labelledby="editStopModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <form action="update-route-stop" method="POST" class="modal-content">
+                      <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title fw-bold" id="editStopModalLabel"><i class="bi bi-pencil-square me-2"></i>Sửa Thời Gian Trạm</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          <input type="hidden" name="routeID" value="<%= selectedRoute.getRouteID() %>">
+                          <input type="hidden" name="stopID" id="editStopID">
+                          
+                          <div class="mb-3">
+                              <label class="form-label fw-bold">Tên trạm dừng</label>
+                              <input type="text" class="form-control bg-light" id="editStopName" readonly>
                           </div>
-                          <div class="modal-footer bg-light">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-success"><i class="bi bi-check-circle me-1"></i>Lưu Trạm</button>
+                          <div class="row g-3">
+                              <div class="col-md-6">
+                                  <label class="form-label fw-bold text-primary">Dự kiến đón (Sáng)</label>
+                                  <input type="time" class="form-control border-primary" id="editEstimatedTime" name="estimatedTime" required>
+                              </div>
+                              <div class="col-md-6">
+                                  <label class="form-label fw-bold text-danger">Dự kiến trả (Chiều)</label>
+                                  <input type="time" class="form-control border-danger" id="editReturnTime" name="returnTime" required>
+                              </div>
                           </div>
-                      </form>
-                    </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning fw-bold"><i class="bi bi-save me-1"></i>Cập Nhật</button>
+                      </div>
+                    </form>
                   </div>
                 </div>
 
@@ -262,7 +295,8 @@
         var originalStops = [
             <% for (int i = 0; i < stops.size(); i++) {
                    Stop s = stops.get(i);
-                   out.print("{lat: " + s.getLatitude() + 
+                   out.print("{id: " + s.getStopID() +
+                             ", lat: " + s.getLatitude() + 
                              ", lng: " + s.getLongitude() + 
                              ", name: '" + s.getStopName().replace("'", "\\'") + "'" +
                              ", address: '" + (s.getAddress() != null ? s.getAddress().replace("'", "\\'") : "") + "'" +
@@ -318,7 +352,8 @@
                             "<small class='text-muted'><i class='bi bi-geo me-1'></i>" + s.address + "</small>" +
                         "</div>" +
                         "<div class='text-end'>" +
-                            "<span class='badge bg-light text-dark border fs-6'><i class='bi bi-clock me-1 text-primary'></i>" + timeStr + "</span>" +
+                            "<span class='badge bg-light text-dark border fs-6 me-2'><i class='bi bi-clock me-1 text-primary'></i>" + timeStr + "</span>" +
+                            "<button class='btn btn-sm btn-outline-secondary rounded-circle' onclick='openEditModal(" + s.id + ", \"" + s.name.replace(/"/g, '&quot;') + "\", \"" + s.estimatedTime + "\", \"" + s.returnTime + "\")' title='Sửa thời gian'><i class='bi bi-pencil'></i></button>" +
                         "</div>" +
                     "</div>" +
                 "</li>";
@@ -442,6 +477,22 @@
                     alert("Đã xảy ra lỗi khi tìm kiếm địa chỉ.");
                 });
         });
+
+        // Edit Modal Logic
+        function openEditModal(id, name, estTime, retTime) {
+            document.getElementById('editStopID').value = id;
+            document.getElementById('editStopName').value = name;
+            
+            // Format time to HH:mm for the input type="time"
+            if (estTime && estTime.length > 5) estTime = estTime.substring(0, 5);
+            if (retTime && retTime.length > 5) retTime = retTime.substring(0, 5);
+            
+            document.getElementById('editEstimatedTime').value = estTime;
+            document.getElementById('editReturnTime').value = retTime;
+            
+            var editModal = new bootstrap.Modal(document.getElementById('editStopModal'));
+            editModal.show();
+        }
 
         <% } %>
     </script>

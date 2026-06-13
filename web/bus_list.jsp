@@ -34,7 +34,7 @@
                 <table class="table table-hover table-striped mb-0 text-center align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID Xe</th>
+                            <th>STT</th>
                             <th>Biển số xe</th>
                             <th>Sức chứa (Ghế)</th>
                             <th>Trạng thái</th>
@@ -45,10 +45,11 @@
                         <%
                             List<Bus> busList = (List<Bus>) request.getAttribute("busList");
                             if (busList != null && !busList.isEmpty()) {
+                                int stt = 1;
                                 for (Bus b : busList) {
                         %>
                             <tr>
-                                <td><%= b.getBusID() %></td>
+                                <td><%= stt++ %></td>
                                 <td class="fw-bold"><%= b.getLicensePlate() %></td>
                                 <td><%= b.getCapacity() %></td>
                                 <td>

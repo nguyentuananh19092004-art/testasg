@@ -2,7 +2,7 @@
 <%@page import="model.HocSinh"%>
 <%
     HocSinh hs = (HocSinh) request.getAttribute("hs");
-    boolean isUpdate = (hs != null);
+    boolean isUpdate = (hs != null && request.getAttribute("isCreate") == null);
 %>
 <!DOCTYPE html>
 <html>
@@ -14,6 +14,10 @@
     <body>
         <div class="container mt-4">
             <h2><%= isUpdate ? "Cập nhật Học sinh" : "Thêm mới Học sinh" %></h2>
+            <% String error = (String) request.getAttribute("error");
+               if (error != null) { %>
+                <div class="alert alert-danger fw-bold"><%= error %></div>
+            <% } %>
             <form action="<%= isUpdate ? "hocsinh-edit" : "hocsinh-add" %>" method="POST">
                 <div class="mb-3">
                     <label>Mã Học Sinh</label>
@@ -39,7 +43,7 @@
                     <label>Trạng Thái</label>
                     <select name="trangThai" class="form-select">
                         <option value="Sử dụng" <%= isUpdate && "Sử dụng".equals(hs.getTrangThai()) ? "selected" : "" %>>Sử dụng</option>
-                        <option value="Không sử dụng" <%= isUpdate && "Không sử dụng".equals(hs.getTrangThai()) ? "selected" : "" %>>Không sử dụng</option>
+                        <option value="Ngưng hoạt động" <%= (!isUpdate) || (isUpdate && "Ngưng hoạt động".equals(hs.getTrangThai())) ? "selected" : "" %>>Ngưng hoạt động</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-success">Lưu</button>

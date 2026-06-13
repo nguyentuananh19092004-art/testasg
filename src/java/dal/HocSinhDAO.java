@@ -23,6 +23,7 @@ public class HocSinhDAO extends DBContext {
                         rs.getString("TenTK"),
                         rs.getString("MatKhau"),
                         rs.getObject("DefaultStopID") != null ? rs.getInt("DefaultStopID") : null,
+                        rs.getObject("DefaultRouteID") != null ? rs.getInt("DefaultRouteID") : null,
                         rs.getString("TrangThai")
                 );
                 list.add(hs);
@@ -47,6 +48,7 @@ public class HocSinhDAO extends DBContext {
                         rs.getString("TenTK"),
                         rs.getString("MatKhau"),
                         rs.getObject("DefaultStopID") != null ? rs.getInt("DefaultStopID") : null,
+                        rs.getObject("DefaultRouteID") != null ? rs.getInt("DefaultRouteID") : null,
                         rs.getString("TrangThai")
                 );
             }
@@ -70,6 +72,7 @@ public class HocSinhDAO extends DBContext {
                         rs.getString("TenTK"),
                         rs.getString("MatKhau"),
                         rs.getObject("DefaultStopID") != null ? rs.getInt("DefaultStopID") : null,
+                        rs.getObject("DefaultRouteID") != null ? rs.getInt("DefaultRouteID") : null,
                         rs.getString("TrangThai")
                 );
             }
@@ -94,6 +97,7 @@ public class HocSinhDAO extends DBContext {
                         rs.getString("TenTK"),
                         rs.getString("MatKhau"),
                         rs.getObject("DefaultStopID") != null ? rs.getInt("DefaultStopID") : null,
+                        rs.getObject("DefaultRouteID") != null ? rs.getInt("DefaultRouteID") : null,
                         rs.getString("TrangThai")
                 ));
             }
@@ -104,7 +108,7 @@ public class HocSinhDAO extends DBContext {
     }
 
     public void insertHocSinh(HocSinh hs) {
-        String sql = "INSERT INTO HocSinh (MaHocSinh, TenHocSinh, Lop, TenTK, MatKhau, DefaultStopID, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO HocSinh (MaHocSinh, TenHocSinh, Lop, TenTK, MatKhau, DefaultStopID, DefaultRouteID, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setString(1, hs.getMaHocSinh());
@@ -117,7 +121,12 @@ public class HocSinhDAO extends DBContext {
             } else {
                 st.setNull(6, java.sql.Types.INTEGER);
             }
-            st.setString(7, hs.getTrangThai());
+            if (hs.getDefaultRouteID() != null) {
+                st.setInt(7, hs.getDefaultRouteID());
+            } else {
+                st.setNull(7, java.sql.Types.INTEGER);
+            }
+            st.setString(8, hs.getTrangThai());
             st.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
@@ -125,7 +134,7 @@ public class HocSinhDAO extends DBContext {
     }
 
     public void updateHocSinh(HocSinh hs) {
-        String sql = "UPDATE HocSinh SET TenHocSinh = ?, Lop = ?, TenTK = ?, MatKhau = ?, DefaultStopID = ?, TrangThai = ? WHERE MaHocSinh = ?";
+        String sql = "UPDATE HocSinh SET TenHocSinh = ?, Lop = ?, TenTK = ?, MatKhau = ?, DefaultStopID = ?, DefaultRouteID = ?, TrangThai = ? WHERE MaHocSinh = ?";
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setString(1, hs.getTenHocSinh());
@@ -137,8 +146,13 @@ public class HocSinhDAO extends DBContext {
             } else {
                 st.setNull(5, java.sql.Types.INTEGER);
             }
-            st.setString(6, hs.getTrangThai());
-            st.setString(7, hs.getMaHocSinh());
+            if (hs.getDefaultRouteID() != null) {
+                st.setInt(6, hs.getDefaultRouteID());
+            } else {
+                st.setNull(6, java.sql.Types.INTEGER);
+            }
+            st.setString(7, hs.getTrangThai());
+            st.setString(8, hs.getMaHocSinh());
             st.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
@@ -171,5 +185,20 @@ public class HocSinhDAO extends DBContext {
             System.out.println(e);
         }
         return false;
+    }
+
+    public int countActiveHocSinhByRoute(int routeID) {
+        String sql = "SELECT COUNT(*) FROM HocSinh WHERE DefaultRouteID = ? AND TrangThai = N'Sử dụng'";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, routeID);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return 0;
     }
 }

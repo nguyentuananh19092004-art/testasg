@@ -40,9 +40,16 @@ public class ParentActionServlet extends HttpServlet {
             
             // Optionally, we can also insert a Notification for Monitor or Admin, but updating TrangThai is enough since Monitor UI shows it.
         } else if ("change_stop".equals(action)) {
-            int stopID = Integer.parseInt(request.getParameter("stopID"));
-            student.setDefaultStopID(stopID);
-            hsDAO.updateHocSinh(student);
+            String stopRoute = request.getParameter("stopRoute");
+            if (stopRoute != null && stopRoute.contains("_")) {
+                String[] parts = stopRoute.split("_");
+                int stopID = Integer.parseInt(parts[0]);
+                int routeID = Integer.parseInt(parts[1]);
+                student.setDefaultStopID(stopID);
+                student.setDefaultRouteID(routeID);
+                student.setTrangThai("Sử dụng");
+                hsDAO.updateHocSinh(student);
+            }
         } else if ("mark_read".equals(action)) {
             int notifID = Integer.parseInt(request.getParameter("notifID"));
             NotificationDAO notifDAO = new NotificationDAO();

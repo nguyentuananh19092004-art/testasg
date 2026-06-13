@@ -1,8 +1,8 @@
-﻿<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.Bus"%>
 <%
     Bus bus = (Bus) request.getAttribute("bus");
-    boolean isEdit = (bus != null);
+    boolean isEdit = (bus != null && bus.getBusID() != 0);
 %>
 <!DOCTYPE html>
 <html lang="vi">

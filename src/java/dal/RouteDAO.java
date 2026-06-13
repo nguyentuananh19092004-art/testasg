@@ -29,4 +29,31 @@ public class RouteDAO extends DBContext {
         }
         return list;
     }
+
+    public List<model.StopRouteOption> getStopRouteOptions() {
+        List<model.StopRouteOption> list = new ArrayList<>();
+        String sql = "SELECT s.StopID, r.RouteID, s.StopName, s.Address, r.RouteName, rs.EstimatedTime, rs.ReturnTime " +
+                     "FROM RouteStops rs " +
+                     "JOIN Stops s ON rs.StopID = s.StopID " +
+                     "JOIN Routes r ON rs.RouteID = r.RouteID " +
+                     "ORDER BY s.StopName, rs.EstimatedTime";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                list.add(new model.StopRouteOption(
+                        rs.getInt("StopID"),
+                        rs.getInt("RouteID"),
+                        rs.getString("StopName"),
+                        rs.getString("Address"),
+                        rs.getString("RouteName"),
+                        rs.getTime("EstimatedTime"),
+                        rs.getTime("ReturnTime")
+                ));
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
 }

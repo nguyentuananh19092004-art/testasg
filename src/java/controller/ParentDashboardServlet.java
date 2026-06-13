@@ -35,9 +35,12 @@ public class ParentDashboardServlet extends HttpServlet {
         if (student != null) {
             request.setAttribute("student", student);
             
+            dal.RouteDAO routeDAO = new dal.RouteDAO();
+            List<model.StopRouteOption> stopRouteOptions = routeDAO.getStopRouteOptions();
+            request.setAttribute("stopRouteOptions", stopRouteOptions);
+            
             StopDAO stopDAO = new StopDAO();
             List<Stop> allStops = stopDAO.getAllStops();
-            request.setAttribute("allStops", allStops);
             
             if (student.getDefaultStopID() != null) {
                 // Find stop details

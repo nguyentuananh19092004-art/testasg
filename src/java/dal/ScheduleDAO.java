@@ -263,4 +263,51 @@ public class ScheduleDAO extends DBContext {
         }
         return false;
     }
+
+    public List<model.TechnicianSchedule> getTechnicianSchedules() {
+        List<model.TechnicianSchedule> list = new ArrayList<>();
+        String sql = "SELECT ts.*, u.FullName FROM TechnicianSchedules ts JOIN Users u ON ts.TechnicianID = u.UserID ORDER BY ts.Date DESC";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                model.TechnicianSchedule ts = new model.TechnicianSchedule(
+                        rs.getInt("TechScheduleID"),
+                        rs.getInt("TechnicianID"),
+                        rs.getDate("Date"),
+                        rs.getTimestamp("CreatedAt")
+                );
+                ts.setTechnicianName(rs.getString("FullName"));
+                list.add(ts);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
+    public boolean insertTechnicianSchedule(int technicianID, Date date) {
+        String sql = "INSERT INTO TechnicianSchedules (TechnicianID, Date) VALUES (?, ?)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, technicianID);
+            st.setDate(2, date);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+    public boolean deleteTechnicianSchedule(int id) {
+        String sql = "DELETE FROM TechnicianSchedules WHERE TechScheduleID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, id);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
 }
