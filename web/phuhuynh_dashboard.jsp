@@ -21,6 +21,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f6f9; }
         .navbar { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
@@ -62,7 +63,7 @@
                             </div>
                         <% } else { %>
                             <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-2"></i> Trạng thái: Hoạt động. Học sinh đi học bình thường.
+                                <i class="bi bi-check-circle-fill me-2"></i> Trạng thái: Hoạt động. Xe đưa đón hoạt động từ ngày mai.
                             </div>
                             <form action="parent-action" method="POST" class="mt-3">
                                 <input type="hidden" name="action" value="report_absent">
@@ -120,12 +121,16 @@
                                                                   student.getDefaultRouteID() == sro.getRouteID());
                                     %>
                                             <option value="<%= val %>" <%= isSelected ? "selected" : "" %>>
-                                                <%= sro.getStopName() %> - Tuyến: <%= sro.getRouteName() %> (Đón: <%= sro.getEstimatedTime().toString().substring(0,5) %>, Trả: <%= sro.getReturnTime() != null ? sro.getReturnTime().toString().substring(0,5) : "--" %>)
+                                                <%= sro.getStopName() %> (Đón: <%= sro.getEstimatedTime().toString().substring(0,5) %>, Trả: <%= sro.getReturnTime() != null ? sro.getReturnTime().toString().substring(0,5) : "--" %>)
                                             </option>
                                     <%  } 
                                        } %>
                                 </select>
                             </div>
+                            
+                            <div id="stopMap" style="height: 350px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #dee2e6; z-index: 1;"></div>
+                            <small class="text-muted d-block mb-3"><i class="bi bi-info-circle me-1"></i>Bạn có thể click vào các điểm trên bản đồ để chọn nhanh điểm đón.</small>
+                            
                             <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Cập nhật điểm đón</button>
                         </form>
                     </div>
@@ -166,5 +171,69 @@
             <div class="alert alert-danger">Lỗi tải thông tin học sinh.</div>
         <% } %>
     </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var map = L.map('stopMap').setView([21.028511, 105.804817], 11); // Default Hanoi
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            var stops = [
+                <% if (stopRouteOptions != null) {
+                    for (int i = 0; i < stopRouteOptions.size(); i++) {
+                        model.StopRouteOption sro = stopRouteOptions.get(i);
+                        String val = sro.getStopID() + "_" + sro.getRouteID();
+                        String estTime = sro.getEstimatedTime() != null ? sro.getEstimatedTime().toString().substring(0,5) : "--";
+                        String retTime = sro.getReturnTime() != null ? sro.getReturnTime().toString().substring(0,5) : "--";
+                %>
+                {
+                    lat: <%= sro.getLatitude() %>,
+                    lng: <%= sro.getLongitude() %>,
+                    val: '<%= val %>',
+                    name: '<%= sro.getStopName().replace("'", "\\'") %>',
+                    desc: 'Đón: <%= estTime %>, Trả: <%= retTime %>'
+                }<%= (i < stopRouteOptions.size() - 1) ? "," : "" %>
+                <%  }
+                   } %>
+            ];
+
+            var bounds = [];
+            stops.forEach(function(stop) {
+                if (stop.lat && stop.lng) {
+                    var marker = L.marker([stop.lat, stop.lng]).addTo(map);
+                    bounds.push([stop.lat, stop.lng]);
+                    
+                    var popupContent = '<div class="text-center"><b>' + stop.name + '</b><br/>' + stop.desc + 
+                                       '<br/><button type="button" class="btn btn-sm btn-primary mt-2 w-100" onclick="selectStop(\'' + stop.val + '\')">Chọn điểm này</button></div>';
+                    marker.bindPopup(popupContent);
+                    
+                    // On click marker, select the option
+                    marker.on('click', function() {
+                        selectStop(stop.val);
+                    });
+                }
+            });
+
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, {padding: [20, 20]});
+            }
+        });
+
+        function selectStop(val) {
+            var select = document.getElementById('stopRoute');
+            select.value = val;
+            
+            // Visual feedback
+            select.classList.add('is-valid');
+            setTimeout(function() {
+                select.classList.remove('is-valid');
+            }, 1500);
+        }
+    </script>
 </body>
 </html>

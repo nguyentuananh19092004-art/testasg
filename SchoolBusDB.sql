@@ -31,6 +31,8 @@ CREATE TABLE Users (
     Status NVARCHAR(50) DEFAULT N'Sẵn sàng'
 );
 GO
+SET QUOTED_IDENTIFIER ON;
+GO
 CREATE UNIQUE NONCLUSTERED INDEX UQ_Users_Phone ON Users(Phone) WHERE Phone IS NOT NULL AND Phone <> '';
 GO
 
@@ -38,7 +40,7 @@ GO
 CREATE TABLE Buses (
     BusID INT IDENTITY(1,1) PRIMARY KEY,
     LicensePlate VARCHAR(20) UNIQUE NOT NULL,
-    Capacity INT NOT NULL CHECK (Capacity IN (29, 47)),
+    Capacity INT NOT NULL CHECK (Capacity IN (7, 9)),
     Status NVARCHAR(50) DEFAULT N'Sẵn sàng' -- Sẵn sàng, Hoạt động, Bảo dưỡng/Sửa chữa
 );
 
@@ -77,7 +79,8 @@ CREATE TABLE HocSinh (
     TenTK VARCHAR(50) UNIQUE NOT NULL,
     MatKhau VARCHAR(255) DEFAULT '123',
     DefaultStopID INT FOREIGN KEY REFERENCES Stops(StopID),
-    TrangThai NVARCHAR(20) DEFAULT N'Sử dụng'
+    DefaultRouteID INT FOREIGN KEY REFERENCES Routes(RouteID),
+    TrangThai NVARCHAR(20) DEFAULT N'Ngưng hoạt động'
 );
 
 -- 7. Bảng Schedules (Lịch chạy hàng ngày)
@@ -279,16 +282,16 @@ INSERT INTO Users (Username, Password, Role, FullName, Phone, Email, Status) VAL
 
 -- 2. Insert Buses
 INSERT INTO Buses (LicensePlate, Capacity, Status) VALUES
-('29E-111.11', 29, N'Sẵn sàng'),
-('29E-222.22', 47, N'Sẵn sàng'),
-('29E-333.33', 29, N'Sẵn sàng'),
-('29E-444.44', 47, N'Sẵn sàng'),
-('29E-555.55', 29, N'Sẵn sàng'),
-('29E-666.66', 47, N'Sẵn sàng'),
-('29E-777.77', 29, N'Sẵn sàng'),
-('29E-888.88', 47, N'Sẵn sàng'),
-('29E-999.99', 29, N'Sẵn sàng'),
-('29E-101.01', 47, N'Sẵn sàng');
+('29E-111.11', 7, N'Sẵn sàng'),
+('29E-222.22', 9, N'Sẵn sàng'),
+('29E-333.33', 7, N'Sẵn sàng'),
+('29E-444.44', 9, N'Sẵn sàng'),
+('29E-555.55', 7, N'Sẵn sàng'),
+('29E-666.66', 9, N'Sẵn sàng'),
+('29E-777.77', 7, N'Sẵn sàng'),
+('29E-888.88', 9, N'Sẵn sàng'),
+('29E-999.99', 7, N'Sẵn sàng'),
+('29E-101.01', 9, N'Sẵn sàng');
 
 -- 3. Insert Routes (Tất cả 6 tuyến xe)
 INSERT INTO Routes (RouteCode, RouteName) VALUES
@@ -301,33 +304,33 @@ INSERT INTO Routes (RouteCode, RouteName) VALUES
 
 -- 4. Insert Stops (Chỉ bao gồm các điểm đón học sinh và Trường học, bỏ qua các tuyến đường đi qua)
 INSERT INTO Stops (StopName, Latitude, Longitude) VALUES
-(N'S2.15 (Ocean Park)', 20.9934, 105.9427),          -- 1
-(N'S1.08 (Ocean Park)', 20.9980, 105.9450),          -- 2
-(N'The Zen Gamuda', 20.9658, 105.8679),              -- 3
+(N'S2.15 (Ocean Park)', 20.9910977, 105.9435884),          -- 1
+(N'S1.08 (Ocean Park)', 20.9947239, 105.9431557),          -- 2
+(N'The Zen Gamuda', 20.9716199, 105.8795939),              -- 3
 (N'LandMark 72', 21.0173, 105.7841),                 -- 4
-(N'Trường Marie Curie', 21.0175, 105.7808),          -- 5
-(N'VinCom Long Biên', 21.0401, 105.9189),            -- 6
-(N'H3 Chu Huy Mân', 21.0345, 105.9123),              -- 7
-(N'423 Minh Khai', 20.9981, 105.8654),               -- 8
+(N'Trường Marie Curie', 21.0165986, 105.7760220),          -- 5
+(N'VinCom Long Biên', 21.0509278, 105.9163608),            -- 6
+(N'H3 Chu Huy Mân', 21.0419908, 105.9044396),              -- 7
+(N'423 Minh Khai', 20.9989958, 105.8664846),               -- 8
 (N'VinCom TimesCity', 20.9954, 105.8675),            -- 9
 (N'Royal City', 21.0028, 105.8155),                  -- 10
 (N'Vincom Metropolis', 21.0317, 105.8143),           -- 11
-(N'VinCom Nguyễn Chí Thanh', 21.0244, 105.8088),     -- 12
-(N'N03-T1 Minh Tảo', 21.0664, 105.7950),             -- 13
-(N'N01-T6', 21.0682, 105.7941),                      -- 14
-(N'6th elements', 21.0573, 105.8005),                -- 15
+(N'VinCom Nguyễn Chí Thanh', 21.0235360, 105.8088920),     -- 12
+(N'N03-T1 Minh Tảo', 21.0654675, 105.7981705),             -- 13
+(N'N01-T6', 21.0633291, 105.7971657),                      -- 14
+(N'6th elements', 21.0513256, 105.7996255),                -- 15
 (N'Tòa N02, Ecohome 3', 21.0772, 105.7831),          -- 16
-(N'27A2 thành phố giao lưu', 21.0543, 105.7803),     -- 17
-(N'R1 GoldMark City', 21.0396, 105.7656),            -- 18
-(N'A1 Vinhome gardenia', 21.0342, 105.7635),         -- 19
-(N'V3 Victory Văn Phú', 20.9572, 105.7644),          -- 20
-(N'P2 ParkCity', 20.9665, 105.7533),                 -- 21
-(N'C16 Gleximco', 20.9882, 105.7421),                -- 22
-(N'A32 Gleximco', 20.9950, 105.7455),                -- 23
-(N'GS1 SmartCity', 21.0084, 105.7483),               -- 24
+(N'27A2 thành phố giao lưu', 21.0520662, 105.7804489),     -- 17
+(N'R1 GoldMark City', 21.0435299, 105.7666960),            -- 18
+(N'A1 Vinhome gardenia', 21.0360243, 105.7603859),         -- 19
+(N'V3 Victory Văn Phú', 20.9591715, 105.7685205),          -- 20
+(N'P2 ParkCity', 20.9638593, 105.7566201),                 -- 21
+(N'C16 Gleximco', 20.9903249, 105.7383832),                -- 22
+(N'A32 Gleximco', 21.0051280, 105.7330400),                -- 23
+(N'GS1 SmartCity', 21.0055366, 105.7371635),               -- 24
 (N'S401 SmartCity', 21.0062, 105.7451),              -- 25
-(N'Mỹ Đình Pearl', 21.0093, 105.7744),               -- 26
-(N'Matrix One', 21.0116, 105.7766);                  -- 27
+(N'Mỹ Đình Pearl', 21.00662, 105.76888),               -- 26
+(N'Matrix One', 21.0092, 105.7739);                  -- 27
 
 -- 5. Insert RouteStops
 -- Tuyến LT1
@@ -382,26 +385,26 @@ INSERT INTO RouteStops (RouteID, StopID, StopOrder, EstimatedTime, ReturnTime) V
 
 -- 6. Insert HocSinh (100 học sinh, 20 hs mỗi lớp từ 1 đến 5)
 INSERT INTO HocSinh (MaHocSinh, TenHocSinh, Lop, TenTK, MatKhau, TrangThai) VALUES
-('L1001', N'Nguyễn Văn A1', 1, 'A1NVL1001', '123', N'Sử dụng'), ('L1002', N'Nguyễn Văn A2', 1, 'A2NVL1002', '123', N'Sử dụng'), ('L1003', N'Nguyễn Văn A3', 1, 'A3NVL1003', '123', N'Sử dụng'), ('L1004', N'Nguyễn Văn A4', 1, 'A4NVL1004', '123', N'Sử dụng'), ('L1005', N'Nguyễn Văn A5', 1, 'A5NVL1005', '123', N'Sử dụng'),
-('L1006', N'Nguyễn Văn A6', 1, 'A6NVL1006', '123', N'Sử dụng'), ('L1007', N'Nguyễn Văn A7', 1, 'A7NVL1007', '123', N'Sử dụng'), ('L1008', N'Nguyễn Văn A8', 1, 'A8NVL1008', '123', N'Sử dụng'), ('L1009', N'Nguyễn Văn A9', 1, 'A9NVL1009', '123', N'Sử dụng'), ('L1010', N'Nguyễn Văn A10', 1, 'A10NVL1010', '123', N'Sử dụng'),
-('L1011', N'Nguyễn Văn A11', 1, 'A11NVL1011', '123', N'Sử dụng'), ('L1012', N'Nguyễn Văn A12', 1, 'A12NVL1012', '123', N'Sử dụng'), ('L1013', N'Nguyễn Văn A13', 1, 'A13NVL1013', '123', N'Sử dụng'), ('L1014', N'Nguyễn Văn A14', 1, 'A14NVL1014', '123', N'Sử dụng'), ('L1015', N'Nguyễn Văn A15', 1, 'A15NVL1015', '123', N'Sử dụng'),
-('L1016', N'Nguyễn Văn A16', 1, 'A16NVL1016', '123', N'Sử dụng'), ('L1017', N'Nguyễn Văn A17', 1, 'A17NVL1017', '123', N'Sử dụng'), ('L1018', N'Nguyễn Văn A18', 1, 'A18NVL1018', '123', N'Sử dụng'), ('L1019', N'Nguyễn Văn A19', 1, 'A19NVL1019', '123', N'Sử dụng'), ('L1020', N'Nguyễn Văn A20', 1, 'A20NVL1020', '123', N'Sử dụng'),
-('L2001', N'Trần Thị B1', 2, 'B1TTL2001', '123', N'Sử dụng'), ('L2002', N'Trần Thị B2', 2, 'B2TTL2002', '123', N'Sử dụng'), ('L2003', N'Trần Thị B3', 2, 'B3TTL2003', '123', N'Sử dụng'), ('L2004', N'Trần Thị B4', 2, 'B4TTL2004', '123', N'Sử dụng'), ('L2005', N'Trần Thị B5', 2, 'B5TTL2005', '123', N'Sử dụng'),
-('L2006', N'Trần Thị B6', 2, 'B6TTL2006', '123', N'Sử dụng'), ('L2007', N'Trần Thị B7', 2, 'B7TTL2007', '123', N'Sử dụng'), ('L2008', N'Trần Thị B8', 2, 'B8TTL2008', '123', N'Sử dụng'), ('L2009', N'Trần Thị B9', 2, 'B9TTL2009', '123', N'Sử dụng'), ('L2010', N'Trần Thị B10', 2, 'B10TTL2010', '123', N'Sử dụng'),
-('L2011', N'Trần Thị B11', 2, 'B11TTL2011', '123', N'Sử dụng'), ('L2012', N'Trần Thị B12', 2, 'B12TTL2012', '123', N'Sử dụng'), ('L2013', N'Trần Thị B13', 2, 'B13TTL2013', '123', N'Sử dụng'), ('L2014', N'Trần Thị B14', 2, 'B14TTL2014', '123', N'Sử dụng'), ('L2015', N'Trần Thị B15', 2, 'B15TTL2015', '123', N'Sử dụng'),
-('L2016', N'Trần Thị B16', 2, 'B16TTL2016', '123', N'Sử dụng'), ('L2017', N'Trần Thị B17', 2, 'B17TTL2017', '123', N'Sử dụng'), ('L2018', N'Trần Thị B18', 2, 'B18TTL2018', '123', N'Sử dụng'), ('L2019', N'Trần Thị B19', 2, 'B19TTL2019', '123', N'Sử dụng'), ('L2020', N'Trần Thị B20', 2, 'B20TTL2020', '123', N'Sử dụng'),
-('L3001', N'Lê Văn C1', 3, 'C1LVL3001', '123', N'Sử dụng'), ('L3002', N'Lê Văn C2', 3, 'C2LVL3002', '123', N'Sử dụng'), ('L3003', N'Lê Văn C3', 3, 'C3LVL3003', '123', N'Sử dụng'), ('L3004', N'Lê Văn C4', 3, 'C4LVL3004', '123', N'Sử dụng'), ('L3005', N'Lê Văn C5', 3, 'C5LVL3005', '123', N'Sử dụng'),
-('L3006', N'Lê Văn C6', 3, 'C6LVL3006', '123', N'Sử dụng'), ('L3007', N'Lê Văn C7', 3, 'C7LVL3007', '123', N'Sử dụng'), ('L3008', N'Lê Văn C8', 3, 'C8LVL3008', '123', N'Sử dụng'), ('L3009', N'Lê Văn C9', 3, 'C9LVL3009', '123', N'Sử dụng'), ('L3010', N'Lê Văn C10', 3, 'C10LVL3010', '123', N'Sử dụng'),
-('L3011', N'Lê Văn C11', 3, 'C11LVL3011', '123', N'Sử dụng'), ('L3012', N'Lê Văn C12', 3, 'C12LVL3012', '123', N'Sử dụng'), ('L3013', N'Lê Văn C13', 3, 'C13LVL3013', '123', N'Sử dụng'), ('L3014', N'Lê Văn C14', 3, 'C14LVL3014', '123', N'Sử dụng'), ('L3015', N'Lê Văn C15', 3, 'C15LVL3015', '123', N'Sử dụng'),
-('L3016', N'Lê Văn C16', 3, 'C16LVL3016', '123', N'Sử dụng'), ('L3017', N'Lê Văn C17', 3, 'C17LVL3017', '123', N'Sử dụng'), ('L3018', N'Lê Văn C18', 3, 'C18LVL3018', '123', N'Sử dụng'), ('L3019', N'Lê Văn C19', 3, 'C19LVL3019', '123', N'Sử dụng'), ('L3020', N'Lê Văn C20', 3, 'C20LVL3020', '123', N'Sử dụng'),
-('L4001', N'Phạm Thị D1', 4, 'D1PTL4001', '123', N'Sử dụng'), ('L4002', N'Phạm Thị D2', 4, 'D2PTL4002', '123', N'Sử dụng'), ('L4003', N'Phạm Thị D3', 4, 'D3PTL4003', '123', N'Sử dụng'), ('L4004', N'Phạm Thị D4', 4, 'D4PTL4004', '123', N'Sử dụng'), ('L4005', N'Phạm Thị D5', 4, 'D5PTL4005', '123', N'Sử dụng'),
-('L4006', N'Phạm Thị D6', 4, 'D6PTL4006', '123', N'Sử dụng'), ('L4007', N'Phạm Thị D7', 4, 'D7PTL4007', '123', N'Sử dụng'), ('L4008', N'Phạm Thị D8', 4, 'D8PTL4008', '123', N'Sử dụng'), ('L4009', N'Phạm Thị D9', 4, 'D9PTL4009', '123', N'Sử dụng'), ('L4010', N'Phạm Thị D10', 4, 'D10PTL4010', '123', N'Sử dụng'),
-('L4011', N'Phạm Thị D11', 4, 'D11PTL4011', '123', N'Sử dụng'), ('L4012', N'Phạm Thị D12', 4, 'D12PTL4012', '123', N'Sử dụng'), ('L4013', N'Phạm Thị D13', 4, 'D13PTL4013', '123', N'Sử dụng'), ('L4014', N'Phạm Thị D14', 4, 'D14PTL4014', '123', N'Sử dụng'), ('L4015', N'Phạm Thị D15', 4, 'D15PTL4015', '123', N'Sử dụng'),
-('L4016', N'Phạm Thị D16', 4, 'D16PTL4016', '123', N'Sử dụng'), ('L4017', N'Phạm Thị D17', 4, 'D17PTL4017', '123', N'Sử dụng'), ('L4018', N'Phạm Thị D18', 4, 'D18PTL4018', '123', N'Sử dụng'), ('L4019', N'Phạm Thị D19', 4, 'D19PTL4019', '123', N'Sử dụng'), ('L4020', N'Phạm Thị D20', 4, 'D20PTL4020', '123', N'Sử dụng'),
-('L5001', N'Hoàng Văn E1', 5, 'E1HVL5001', '123', N'Sử dụng'), ('L5002', N'Hoàng Văn E2', 5, 'E2HVL5002', '123', N'Sử dụng'), ('L5003', N'Hoàng Văn E3', 5, 'E3HVL5003', '123', N'Sử dụng'), ('L5004', N'Hoàng Văn E4', 5, 'E4HVL5004', '123', N'Sử dụng'), ('L5005', N'Hoàng Văn E5', 5, 'E5HVL5005', '123', N'Sử dụng'),
-('L5006', N'Hoàng Văn E6', 5, 'E6HVL5006', '123', N'Sử dụng'), ('L5007', N'Hoàng Văn E7', 5, 'E7HVL5007', '123', N'Sử dụng'), ('L5008', N'Hoàng Văn E8', 5, 'E8HVL5008', '123', N'Sử dụng'), ('L5009', N'Hoàng Văn E9', 5, 'E9HVL5009', '123', N'Sử dụng'), ('L5010', N'Hoàng Văn E10', 5, 'E10HVL5010', '123', N'Sử dụng'),
-('L5011', N'Hoàng Văn E11', 5, 'E11HVL5011', '123', N'Sử dụng'), ('L5012', N'Hoàng Văn E12', 5, 'E12HVL5012', '123', N'Sử dụng'), ('L5013', N'Hoàng Văn E13', 5, 'E13HVL5013', '123', N'Sử dụng'), ('L5014', N'Hoàng Văn E14', 5, 'E14HVL5014', '123', N'Sử dụng'), ('L5015', N'Hoàng Văn E15', 5, 'E15HVL5015', '123', N'Sử dụng'),
-('L5016', N'Hoàng Văn E16', 5, 'E16HVL5016', '123', N'Sử dụng'), ('L5017', N'Hoàng Văn E17', 5, 'E17HVL5017', '123', N'Sử dụng'), ('L5018', N'Hoàng Văn E18', 5, 'E18HVL5018', '123', N'Sử dụng'), ('L5019', N'Hoàng Văn E19', 5, 'E19HVL5019', '123', N'Sử dụng'), ('L5020', N'Hoàng Văn E20', 5, 'E20HVL5020', '123', N'Sử dụng');
+('L1001', N'Nguyễn Văn A1', 1, 'A1NVL1001', '123', N'Ngưng hoạt động'), ('L1002', N'Nguyễn Văn A2', 1, 'A2NVL1002', '123', N'Ngưng hoạt động'), ('L1003', N'Nguyễn Văn A3', 1, 'A3NVL1003', '123', N'Ngưng hoạt động'), ('L1004', N'Nguyễn Văn A4', 1, 'A4NVL1004', '123', N'Ngưng hoạt động'), ('L1005', N'Nguyễn Văn A5', 1, 'A5NVL1005', '123', N'Ngưng hoạt động'),
+('L1006', N'Nguyễn Văn A6', 1, 'A6NVL1006', '123', N'Ngưng hoạt động'), ('L1007', N'Nguyễn Văn A7', 1, 'A7NVL1007', '123', N'Ngưng hoạt động'), ('L1008', N'Nguyễn Văn A8', 1, 'A8NVL1008', '123', N'Ngưng hoạt động'), ('L1009', N'Nguyễn Văn A9', 1, 'A9NVL1009', '123', N'Ngưng hoạt động'), ('L1010', N'Nguyễn Văn A10', 1, 'A10NVL1010', '123', N'Ngưng hoạt động'),
+('L1011', N'Nguyễn Văn A11', 1, 'A11NVL1011', '123', N'Ngưng hoạt động'), ('L1012', N'Nguyễn Văn A12', 1, 'A12NVL1012', '123', N'Ngưng hoạt động'), ('L1013', N'Nguyễn Văn A13', 1, 'A13NVL1013', '123', N'Ngưng hoạt động'), ('L1014', N'Nguyễn Văn A14', 1, 'A14NVL1014', '123', N'Ngưng hoạt động'), ('L1015', N'Nguyễn Văn A15', 1, 'A15NVL1015', '123', N'Ngưng hoạt động'),
+('L1016', N'Nguyễn Văn A16', 1, 'A16NVL1016', '123', N'Ngưng hoạt động'), ('L1017', N'Nguyễn Văn A17', 1, 'A17NVL1017', '123', N'Ngưng hoạt động'), ('L1018', N'Nguyễn Văn A18', 1, 'A18NVL1018', '123', N'Ngưng hoạt động'), ('L1019', N'Nguyễn Văn A19', 1, 'A19NVL1019', '123', N'Ngưng hoạt động'), ('L1020', N'Nguyễn Văn A20', 1, 'A20NVL1020', '123', N'Ngưng hoạt động'),
+('L2001', N'Trần Thị B1', 2, 'B1TTL2001', '123', N'Ngưng hoạt động'), ('L2002', N'Trần Thị B2', 2, 'B2TTL2002', '123', N'Ngưng hoạt động'), ('L2003', N'Trần Thị B3', 2, 'B3TTL2003', '123', N'Ngưng hoạt động'), ('L2004', N'Trần Thị B4', 2, 'B4TTL2004', '123', N'Ngưng hoạt động'), ('L2005', N'Trần Thị B5', 2, 'B5TTL2005', '123', N'Ngưng hoạt động'),
+('L2006', N'Trần Thị B6', 2, 'B6TTL2006', '123', N'Ngưng hoạt động'), ('L2007', N'Trần Thị B7', 2, 'B7TTL2007', '123', N'Ngưng hoạt động'), ('L2008', N'Trần Thị B8', 2, 'B8TTL2008', '123', N'Ngưng hoạt động'), ('L2009', N'Trần Thị B9', 2, 'B9TTL2009', '123', N'Ngưng hoạt động'), ('L2010', N'Trần Thị B10', 2, 'B10TTL2010', '123', N'Ngưng hoạt động'),
+('L2011', N'Trần Thị B11', 2, 'B11TTL2011', '123', N'Ngưng hoạt động'), ('L2012', N'Trần Thị B12', 2, 'B12TTL2012', '123', N'Ngưng hoạt động'), ('L2013', N'Trần Thị B13', 2, 'B13TTL2013', '123', N'Ngưng hoạt động'), ('L2014', N'Trần Thị B14', 2, 'B14TTL2014', '123', N'Ngưng hoạt động'), ('L2015', N'Trần Thị B15', 2, 'B15TTL2015', '123', N'Ngưng hoạt động'),
+('L2016', N'Trần Thị B16', 2, 'B16TTL2016', '123', N'Ngưng hoạt động'), ('L2017', N'Trần Thị B17', 2, 'B17TTL2017', '123', N'Ngưng hoạt động'), ('L2018', N'Trần Thị B18', 2, 'B18TTL2018', '123', N'Ngưng hoạt động'), ('L2019', N'Trần Thị B19', 2, 'B19TTL2019', '123', N'Ngưng hoạt động'), ('L2020', N'Trần Thị B20', 2, 'B20TTL2020', '123', N'Ngưng hoạt động'),
+('L3001', N'Lê Văn C1', 3, 'C1LVL3001', '123', N'Ngưng hoạt động'), ('L3002', N'Lê Văn C2', 3, 'C2LVL3002', '123', N'Ngưng hoạt động'), ('L3003', N'Lê Văn C3', 3, 'C3LVL3003', '123', N'Ngưng hoạt động'), ('L3004', N'Lê Văn C4', 3, 'C4LVL3004', '123', N'Ngưng hoạt động'), ('L3005', N'Lê Văn C5', 3, 'C5LVL3005', '123', N'Ngưng hoạt động'),
+('L3006', N'Lê Văn C6', 3, 'C6LVL3006', '123', N'Ngưng hoạt động'), ('L3007', N'Lê Văn C7', 3, 'C7LVL3007', '123', N'Ngưng hoạt động'), ('L3008', N'Lê Văn C8', 3, 'C8LVL3008', '123', N'Ngưng hoạt động'), ('L3009', N'Lê Văn C9', 3, 'C9LVL3009', '123', N'Ngưng hoạt động'), ('L3010', N'Lê Văn C10', 3, 'C10LVL3010', '123', N'Ngưng hoạt động'),
+('L3011', N'Lê Văn C11', 3, 'C11LVL3011', '123', N'Ngưng hoạt động'), ('L3012', N'Lê Văn C12', 3, 'C12LVL3012', '123', N'Ngưng hoạt động'), ('L3013', N'Lê Văn C13', 3, 'C13LVL3013', '123', N'Ngưng hoạt động'), ('L3014', N'Lê Văn C14', 3, 'C14LVL3014', '123', N'Ngưng hoạt động'), ('L3015', N'Lê Văn C15', 3, 'C15LVL3015', '123', N'Ngưng hoạt động'),
+('L3016', N'Lê Văn C16', 3, 'C16LVL3016', '123', N'Ngưng hoạt động'), ('L3017', N'Lê Văn C17', 3, 'C17LVL3017', '123', N'Ngưng hoạt động'), ('L3018', N'Lê Văn C18', 3, 'C18LVL3018', '123', N'Ngưng hoạt động'), ('L3019', N'Lê Văn C19', 3, 'C19LVL3019', '123', N'Ngưng hoạt động'), ('L3020', N'Lê Văn C20', 3, 'C20LVL3020', '123', N'Ngưng hoạt động'),
+('L4001', N'Phạm Thị D1', 4, 'D1PTL4001', '123', N'Ngưng hoạt động'), ('L4002', N'Phạm Thị D2', 4, 'D2PTL4002', '123', N'Ngưng hoạt động'), ('L4003', N'Phạm Thị D3', 4, 'D3PTL4003', '123', N'Ngưng hoạt động'), ('L4004', N'Phạm Thị D4', 4, 'D4PTL4004', '123', N'Ngưng hoạt động'), ('L4005', N'Phạm Thị D5', 4, 'D5PTL4005', '123', N'Ngưng hoạt động'),
+('L4006', N'Phạm Thị D6', 4, 'D6PTL4006', '123', N'Ngưng hoạt động'), ('L4007', N'Phạm Thị D7', 4, 'D7PTL4007', '123', N'Ngưng hoạt động'), ('L4008', N'Phạm Thị D8', 4, 'D8PTL4008', '123', N'Ngưng hoạt động'), ('L4009', N'Phạm Thị D9', 4, 'D9PTL4009', '123', N'Ngưng hoạt động'), ('L4010', N'Phạm Thị D10', 4, 'D10PTL4010', '123', N'Ngưng hoạt động'),
+('L4011', N'Phạm Thị D11', 4, 'D11PTL4011', '123', N'Ngưng hoạt động'), ('L4012', N'Phạm Thị D12', 4, 'D12PTL4012', '123', N'Ngưng hoạt động'), ('L4013', N'Phạm Thị D13', 4, 'D13PTL4013', '123', N'Ngưng hoạt động'), ('L4014', N'Phạm Thị D14', 4, 'D14PTL4014', '123', N'Ngưng hoạt động'), ('L4015', N'Phạm Thị D15', 4, 'D15PTL4015', '123', N'Ngưng hoạt động'),
+('L4016', N'Phạm Thị D16', 4, 'D16PTL4016', '123', N'Ngưng hoạt động'), ('L4017', N'Phạm Thị D17', 4, 'D17PTL4017', '123', N'Ngưng hoạt động'), ('L4018', N'Phạm Thị D18', 4, 'D18PTL4018', '123', N'Ngưng hoạt động'), ('L4019', N'Phạm Thị D19', 4, 'D19PTL4019', '123', N'Ngưng hoạt động'), ('L4020', N'Phạm Thị D20', 4, 'D20PTL4020', '123', N'Ngưng hoạt động'),
+('L5001', N'Hoàng Văn E1', 5, 'E1HVL5001', '123', N'Ngưng hoạt động'), ('L5002', N'Hoàng Văn E2', 5, 'E2HVL5002', '123', N'Ngưng hoạt động'), ('L5003', N'Hoàng Văn E3', 5, 'E3HVL5003', '123', N'Ngưng hoạt động'), ('L5004', N'Hoàng Văn E4', 5, 'E4HVL5004', '123', N'Ngưng hoạt động'), ('L5005', N'Hoàng Văn E5', 5, 'E5HVL5005', '123', N'Ngưng hoạt động'),
+('L5006', N'Hoàng Văn E6', 5, 'E6HVL5006', '123', N'Ngưng hoạt động'), ('L5007', N'Hoàng Văn E7', 5, 'E7HVL5007', '123', N'Ngưng hoạt động'), ('L5008', N'Hoàng Văn E8', 5, 'E8HVL5008', '123', N'Ngưng hoạt động'), ('L5009', N'Hoàng Văn E9', 5, 'E9HVL5009', '123', N'Ngưng hoạt động'), ('L5010', N'Hoàng Văn E10', 5, 'E10HVL5010', '123', N'Ngưng hoạt động'),
+('L5011', N'Hoàng Văn E11', 5, 'E11HVL5011', '123', N'Ngưng hoạt động'), ('L5012', N'Hoàng Văn E12', 5, 'E12HVL5012', '123', N'Ngưng hoạt động'), ('L5013', N'Hoàng Văn E13', 5, 'E13HVL5013', '123', N'Ngưng hoạt động'), ('L5014', N'Hoàng Văn E14', 5, 'E14HVL5014', '123', N'Ngưng hoạt động'), ('L5015', N'Hoàng Văn E15', 5, 'E15HVL5015', '123', N'Ngưng hoạt động'),
+('L5016', N'Hoàng Văn E16', 5, 'E16HVL5016', '123', N'Ngưng hoạt động'), ('L5017', N'Hoàng Văn E17', 5, 'E17HVL5017', '123', N'Ngưng hoạt động'), ('L5018', N'Hoàng Văn E18', 5, 'E18HVL5018', '123', N'Ngưng hoạt động'), ('L5019', N'Hoàng Văn E19', 5, 'E19HVL5019', '123', N'Ngưng hoạt động'), ('L5020', N'Hoàng Văn E20', 5, 'E20HVL5020', '123', N'Ngưng hoạt động');
 
 
 

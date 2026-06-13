@@ -11,6 +11,7 @@ import model.Stop;
 import model.User;
 import model.HocSinh;
 import model.ScheduleProgress;
+import dal.AttendanceDAO;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,10 @@ public class MonitorDashboardServlet extends HttpServlet {
                 List<ScheduleProgress> progresses = progressDAO.getProgressBySchedule(activeSchedule.getScheduleID());
                 List<Integer> reachedStops = progresses.stream().map(ScheduleProgress::getStopID).collect(java.util.stream.Collectors.toList());
                 request.setAttribute("reachedStops", reachedStops);
+                
+                AttendanceDAO attendanceDAO = new AttendanceDAO();
+                List<String> attendedStudents = attendanceDAO.getAttendedStudents(activeSchedule.getScheduleID());
+                request.setAttribute("attendedStudents", attendedStudents);
             }
         }
 

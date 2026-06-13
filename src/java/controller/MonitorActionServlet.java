@@ -36,6 +36,19 @@ public class MonitorActionServlet extends HttpServlet {
             String message = "Xe buýt đã gần đến điểm đón: " + stopName + ". Phụ huynh vui lòng chuẩn bị cho học sinh ra điểm đón!";
             NotificationDAO dao = new NotificationDAO();
             dao.insertNotification(hocSinhTK, message); // The Username in Notification table matches the HocSinh.TenTK which is the Parent's account.
+        } else if ("mark_attendance".equals(action)) {
+            int scheduleID = Integer.parseInt(request.getParameter("scheduleID"));
+            int stopID = Integer.parseInt(request.getParameter("stopID"));
+            String maHocSinh = request.getParameter("maHocSinh");
+            boolean isAbsent = Boolean.parseBoolean(request.getParameter("isAbsent"));
+            String direction = request.getParameter("direction");
+            
+            dal.AttendanceDAO dao = new dal.AttendanceDAO();
+            dao.insertAttendance(scheduleID, maHocSinh, stopID, isAbsent, direction);
+        } else if ("complete_trip".equals(action)) {
+            int scheduleID = Integer.parseInt(request.getParameter("scheduleID"));
+            ScheduleProgressDAO dao = new ScheduleProgressDAO();
+            dao.insertProgress(scheduleID, -1); // -1 marks that the monitor has completed the trip
         }
 
         response.sendRedirect("monitor-dashboard");

@@ -47,6 +47,19 @@ public class DriverActionServlet extends HttpServlet {
             updateBusStatus(busID, "Bảo dưỡng/Sửa chữa", busDAO);
             
             // Notification can also be sent to Technician here, but UI Dashboard handles reading IncidentStatus.
+        } else if ("complete_trip".equals(action)) {
+            String busCondition = request.getParameter("busCondition");
+            String note = request.getParameter("note");
+            
+            // Update Schedule Status to COMPLETED
+            updateScheduleStatus(scheduleID, "COMPLETED", scheduleDAO);
+            
+            if ("OK".equals(busCondition)) {
+                updateBusStatus(busID, "Sẵn sàng", busDAO);
+            } else {
+                updateBusStatus(busID, "Bảo dưỡng/Sửa chữa", busDAO);
+                updateScheduleIncidentStatus(scheduleID, note != null && !note.isEmpty() ? "Báo hỏng: " + note : "Cần bảo dưỡng", scheduleDAO);
+            }
         }
 
         response.sendRedirect("driver-dashboard");

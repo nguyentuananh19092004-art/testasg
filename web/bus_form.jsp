@@ -43,8 +43,8 @@
                             <div class="mb-3">
                                 <label for="capacity" class="form-label fw-bold">Sức chứa (Ghế)</label>
                                 <select class="form-select" id="capacity" name="capacity" required>
-                                    <option value="29" <%= (isEdit && bus.getCapacity() == 29) ? "selected" : "" %>>29 chỗ</option>
-                                    <option value="47" <%= (isEdit && bus.getCapacity() == 47) ? "selected" : "" %>>47 chỗ</option>
+                                    <option value="7" <%= (isEdit && bus.getCapacity() == 7) ? "selected" : "" %>>7 chỗ</option>
+                                    <option value="9" <%= (isEdit && bus.getCapacity() == 9) ? "selected" : "" %>>9 chỗ</option>
                                 </select>
                             </div>
                             

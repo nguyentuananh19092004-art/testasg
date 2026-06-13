@@ -42,6 +42,18 @@
         }
         return "Unknown";
     }
+    String checkSelected(String errDir, String targetDir, String paramVal, int currentVal) {
+        if (errDir != null && errDir.equals(targetDir) && paramVal != null && paramVal.equals(String.valueOf(currentVal))) {
+            return "selected";
+        }
+        return "";
+    }
+    String checkDefault(String errDir, String targetDir, String paramVal) {
+        if (errDir != null && errDir.equals(targetDir) && paramVal != null && !paramVal.isEmpty()) {
+            return "";
+        }
+        return "selected";
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -88,13 +100,35 @@
         <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Đã quá 16h (4h chiều), không thể phân ca chiều về (Về nhà) cho ngày hôm nay nữa!</div>
     <% } else if("tech_past_date".equals(request.getParameter("msg"))) { %>
         <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân ca kỹ thuật cho ngày hôm trước!</div>
+    <% } else if("overcapacity".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân thêm xe! Tuyến này đã đủ sức chứa cho số lượng học sinh hiện tại (không cần thêm xe).</div>
+    <% } else if("no_students".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân xe! Tuyến này hiện không có học sinh nào đăng ký hoạt động.</div>
     <% } %>
+
+    <% 
+       String errDir = request.getParameter("direction");
+       String errRoute = request.getParameter("routeID");
+       String errBus = request.getParameter("busID");
+       String errDriver = request.getParameter("driverID");
+       String errMonitor = request.getParameter("monitorID");
+       String selectedDate = (String) request.getAttribute("selectedDate"); 
+    %>
+    <!-- Date Picker Form -->
+    <div class="card shadow-sm mb-4 border-info">
+        <div class="card-body bg-light d-flex align-items-center">
+            <h5 class="mb-0 me-3 text-info"><i class="bi bi-calendar3 me-2"></i>Chọn ngày phân ca:</h5>
+            <form action="ScheduleServlet" method="GET" class="d-flex m-0" id="dateForm">
+                <input type="date" name="selectedDate" value="<%= selectedDate %>" class="form-control" required onchange="document.getElementById('dateForm').submit();" style="cursor: pointer;" onclick="this.showPicker()">
+            </form>
+        </div>
+    </div>
 
     <% java.util.List<String> capacityWarnings = (java.util.List<String>) request.getAttribute("capacityWarnings"); 
        if (capacityWarnings != null && !capacityWarnings.isEmpty()) { %>
         <div class="card shadow-sm border-danger mb-4">
             <div class="card-header bg-danger text-white fw-bold">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> Bảng Cảnh Báo & Đề Xuất Phân Xe Hôm Nay
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Bảng Cảnh Báo & Đề Xuất Phân Xe Ngày <%= selectedDate %>
             </div>
             <div class="card-body bg-light">
                 <ul class="mb-0 text-danger fw-bold">
@@ -106,72 +140,129 @@
         </div>
     <% } %>
 
-    <div class="row">
-        <!-- Form Phân ca -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Thêm Ca Mới</h5>
+    <div class="row mb-4">
+        <!-- Form Phân ca Đến trường -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-sun me-2"></i>Phân ca Chiều đi (Đến trường)</h5>
+                    <span class="badge bg-light text-primary"><%= selectedDate %></span>
                 </div>
                 <div class="card-body">
                     <form action="ScheduleServlet" method="POST">
-                        <div class="mb-3">
-                            <label for="scheduleDate">Ngày chạy</label>
-                            <input type="date" id="scheduleDate" name="date" class="form-control" required style="cursor: pointer;" onclick="this.showPicker()">
-                        </div>
-                        <div class="mb-3">
-                            <label>Chiều đi</label>
-                            <select name="direction" class="form-select">
-                                <option value="TO_SCHOOL">Đến trường</option>
-                                <option value="TO_HOME">Về nhà</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="date" value="<%= selectedDate %>">
+                        <input type="hidden" name="direction" value="TO_SCHOOL">
                         <div class="mb-3">
                             <label>Tuyến đường</label>
-                            <select name="routeID" class="form-select">
+                            <select name="routeID" class="form-select" required>
+                                <option value="" disabled <%= checkDefault(errDir, "TO_SCHOOL", errRoute) %>>-- Chọn tuyến đường --</option>
                                 <% java.util.Map<Integer, Integer> routeStudentCounts = (java.util.Map<Integer, Integer>) request.getAttribute("routeStudentCounts"); %>
                                 <% if(routes != null) for(Route r : routes) { 
                                     int c = routeStudentCounts != null && routeStudentCounts.containsKey(r.getRouteID()) ? routeStudentCounts.get(r.getRouteID()) : 0;
                                 %>
-                                    <option value="<%= r.getRouteID() %>"><%= r.getRouteName() %> (Đang có <%= c %> học sinh)</option>
+                                    <option value="<%= r.getRouteID() %>" <%= checkSelected(errDir, "TO_SCHOOL", errRoute, r.getRouteID()) %>><%= r.getRouteName() %> (Đang có <%= c %> học sinh)</option>
                                 <% } %>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label>Xe Bus</label>
-                            <select name="busID" class="form-select">
+                            <select name="busID" class="form-select" required>
+                                <option value="" disabled <%= checkDefault(errDir, "TO_SCHOOL", errBus) %>>-- Chọn xe bus --</option>
                                 <% if(buses != null) for(Bus b : buses) { %>
-                                    <option value="<%= b.getBusID() %>"><%= b.getLicensePlate() %> (<%= b.getCapacity() %> chỗ)</option>
+                                    <option value="<%= b.getBusID() %>" <%= checkSelected(errDir, "TO_SCHOOL", errBus, b.getBusID()) %>><%= b.getLicensePlate() %> (<%= b.getCapacity() %> chỗ)</option>
                                 <% } %>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label>Tài xế</label>
-                            <select name="driverID" class="form-select">
-                                <% if(drivers != null) for(User d : drivers) { %>
-                                    <option value="<%= d.getUserID() %>"><%= d.getFullName() %></option>
-                                <% } %>
-                            </select>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label>Tài xế</label>
+                                <select name="driverID" class="form-select" required>
+                                    <option value="" disabled <%= checkDefault(errDir, "TO_SCHOOL", errDriver) %>>-- Chọn tài xế --</option>
+                                    <% if(drivers != null) for(User d : drivers) { %>
+                                        <option value="<%= d.getUserID() %>" <%= checkSelected(errDir, "TO_SCHOOL", errDriver, d.getUserID()) %>><%= d.getFullName() %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label>Giám thị</label>
+                                <select name="monitorID" class="form-select" required>
+                                    <option value="" disabled <%= checkDefault(errDir, "TO_SCHOOL", errMonitor) %>>-- Chọn giám thị --</option>
+                                    <% if(monitors != null) for(User m : monitors) { %>
+                                        <option value="<%= m.getUserID() %>" <%= checkSelected(errDir, "TO_SCHOOL", errMonitor, m.getUserID()) %>><%= m.getFullName() %></option>
+                                    <% } %>
+                                </select>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label>Giám thị</label>
-                            <select name="monitorID" class="form-select">
-                                <% if(monitors != null) for(User m : monitors) { %>
-                                    <option value="<%= m.getUserID() %>"><%= m.getFullName() %></option>
-                                <% } %>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Lưu phân ca</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-floppy me-2"></i>Lưu ca Đến trường</button>
                     </form>
                 </div>
             </div>
         </div>
 
+        <!-- Form Phân ca Về nhà -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-moon-stars me-2"></i>Phân ca Chiều về (Về nhà)</h5>
+                    <span class="badge bg-light text-success"><%= selectedDate %></span>
+                </div>
+                <div class="card-body">
+                    <form action="ScheduleServlet" method="POST">
+                        <input type="hidden" name="date" value="<%= selectedDate %>">
+                        <input type="hidden" name="direction" value="TO_HOME">
+                        <div class="mb-3">
+                            <label>Tuyến đường</label>
+                            <select name="routeID" class="form-select" required>
+                                <option value="" disabled <%= checkDefault(errDir, "TO_HOME", errRoute) %>>-- Chọn tuyến đường --</option>
+                                <% if(routes != null) for(Route r : routes) { 
+                                    int c = routeStudentCounts != null && routeStudentCounts.containsKey(r.getRouteID()) ? routeStudentCounts.get(r.getRouteID()) : 0;
+                                %>
+                                    <option value="<%= r.getRouteID() %>" <%= checkSelected(errDir, "TO_HOME", errRoute, r.getRouteID()) %>><%= r.getRouteName() %> (Đang có <%= c %> học sinh)</option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Xe Bus</label>
+                            <select name="busID" class="form-select" required>
+                                <option value="" disabled <%= checkDefault(errDir, "TO_HOME", errBus) %>>-- Chọn xe bus --</option>
+                                <% if(buses != null) for(Bus b : buses) { %>
+                                    <option value="<%= b.getBusID() %>" <%= checkSelected(errDir, "TO_HOME", errBus, b.getBusID()) %>><%= b.getLicensePlate() %> (<%= b.getCapacity() %> chỗ)</option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label>Tài xế</label>
+                                <select name="driverID" class="form-select" required>
+                                    <option value="" disabled <%= checkDefault(errDir, "TO_HOME", errDriver) %>>-- Chọn tài xế --</option>
+                                    <% if(drivers != null) for(User d : drivers) { %>
+                                        <option value="<%= d.getUserID() %>" <%= checkSelected(errDir, "TO_HOME", errDriver, d.getUserID()) %>><%= d.getFullName() %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label>Giám thị</label>
+                                <select name="monitorID" class="form-select" required>
+                                    <option value="" disabled <%= checkDefault(errDir, "TO_HOME", errMonitor) %>>-- Chọn giám thị --</option>
+                                    <% if(monitors != null) for(User m : monitors) { %>
+                                        <option value="<%= m.getUserID() %>" <%= checkSelected(errDir, "TO_HOME", errMonitor, m.getUserID()) %>><%= m.getFullName() %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold"><i class="bi bi-floppy me-2"></i>Lưu ca Về nhà</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <!-- Danh sách ca đã phân -->
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Danh sách Phân ca</h5>
+                    <h5 class="mb-0">Danh sách Phân ca Ngày <%= selectedDate %></h5>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-hover table-striped mb-0 text-nowrap">
@@ -193,7 +284,7 @@
                                 for(Schedule s : schedules) { %>
                                 <tr>
                                     <td>#<%= s.getScheduleID() %></td>
-                                    <td><%= s.getDate() %></td>
+                                    <td class="fw-bold text-primary"><%= s.getDate() %></td>
                                     <td><%= s.getDirection().equals("TO_SCHOOL") ? "Đến trường" : "Về nhà" %></td>
                                     <td>LT<%= s.getRouteID() %></td>
                                     <td><%= getBusPlate(buses, s.getBusID()) %></td>

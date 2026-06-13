@@ -65,30 +65,42 @@ public class ScheduleServlet extends HttpServlet {
         dal.HocSinhDAO hsDAO = new dal.HocSinhDAO();
         java.util.Map<Integer, Integer> routeStudentCounts = new java.util.HashMap<>();
         List<String> capacityWarnings = new java.util.ArrayList<>();
-        java.time.LocalDate today = java.time.LocalDate.now();
-        java.sql.Date sqlToday = java.sql.Date.valueOf(today);
+        
+        // Handle selectedDate
+        String dateParam = request.getParameter("selectedDate");
+        java.time.LocalDate selectedDate;
+        if (dateParam != null && !dateParam.isEmpty()) {
+            selectedDate = java.time.LocalDate.parse(dateParam);
+        } else {
+            selectedDate = java.time.LocalDate.now().plusDays(1); // Default to tomorrow
+        }
+        java.sql.Date sqlSelectedDate = java.sql.Date.valueOf(selectedDate);
+        request.setAttribute("selectedDate", selectedDate.toString());
+        
+        // Filter schedules to only show the selected date
+        schedules = schedules.stream().filter(s -> s.getDate().equals(sqlSelectedDate)).collect(Collectors.toList());
         
         for (Route r : routes) {
             int students = hsDAO.countActiveHocSinhByRoute(r.getRouteID());
             routeStudentCounts.put(r.getRouteID(), students);
             
             if (students > 0) {
-                int optimal47 = students / 45;
-                int remainder = students % 45;
-                int optimal29 = 0;
+                int optimal9 = students / 7;
+                int remainder = students % 7;
+                int optimal7 = 0;
                 if (remainder > 0) {
-                    if (remainder <= 27) {
-                        optimal29 = 1;
+                    if (remainder <= 5) {
+                        optimal7 = 1;
                     } else {
-                        optimal47++;
+                        optimal9++;
                     }
                 }
-                String suggestion = (optimal47 > 0 ? optimal47 + " xe 47 chỗ " : "") + (optimal29 > 0 ? optimal29 + " xe 29 chỗ" : "");
+                String suggestion = (optimal9 > 0 ? optimal9 + " xe 9 chỗ " : "") + (optimal7 > 0 ? optimal7 + " xe 7 chỗ" : "");
                 
                 int assignedSchool = 0;
                 int assignedHome = 0;
                 for (Schedule s : schedules) {
-                    if (s.getRouteID() == r.getRouteID() && s.getDate().equals(sqlToday)) {
+                    if (s.getRouteID() == r.getRouteID() && s.getDate().equals(sqlSelectedDate)) {
                         Bus b = buses.stream().filter(bus -> bus.getBusID() == s.getBusID()).findFirst().orElse(null);
                         if (b != null) {
                             if ("TO_SCHOOL".equals(s.getDirection())) assignedSchool += (b.getCapacity() - 2);
@@ -98,10 +110,10 @@ public class ScheduleServlet extends HttpServlet {
                 }
                 
                 if (assignedSchool < students) {
-                    capacityWarnings.add("Tuyến " + r.getRouteName() + " (Đến trường hôm nay): Có " + students + " học sinh đăng ký. Đã gán sức chứa: " + assignedSchool + ". Còn thiếu: " + (students - assignedSchool) + " chỗ. Đề xuất tổng cộng: " + suggestion);
+                    capacityWarnings.add("Tuyến " + r.getRouteName() + " (Đến trường ngày " + selectedDate.toString() + "): Có " + students + " học sinh đăng ký. Đã gán: " + assignedSchool + ". Còn thiếu: " + (students - assignedSchool) + " chỗ. Đề xuất: " + suggestion);
                 }
                 if (assignedHome < students) {
-                    capacityWarnings.add("Tuyến " + r.getRouteName() + " (Về nhà hôm nay): Có " + students + " học sinh đăng ký. Đã gán sức chứa: " + assignedHome + ". Còn thiếu: " + (students - assignedHome) + " chỗ. Đề xuất tổng cộng: " + suggestion);
+                    capacityWarnings.add("Tuyến " + r.getRouteName() + " (Về nhà ngày " + selectedDate.toString() + "): Có " + students + " học sinh đăng ký. Đã gán: " + assignedHome + ". Còn thiếu: " + (students - assignedHome) + " chỗ. Đề xuất: " + suggestion);
                 }
             }
         }
@@ -138,26 +150,55 @@ public class ScheduleServlet extends HttpServlet {
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
             java.time.LocalDate today = now.toLocalDate();
 
+            String paramStr = "&selectedDate=" + date.toString() + "&direction=" + direction + "&routeID=" + routeID + "&busID=" + busID + "&driverID=" + driverID + "&monitorID=" + monitorID;
+
             if (scheduleDate.isBefore(today)) {
-                response.sendRedirect("ScheduleServlet?msg=past_date");
+                response.sendRedirect("ScheduleServlet?msg=past_date" + paramStr);
                 return;
             }
 
             if (scheduleDate.isEqual(today)) {
                 if ("TO_SCHOOL".equals(direction) && now.getHour() >= 6) {
-                    response.sendRedirect("ScheduleServlet?msg=timeout_school");
+                    response.sendRedirect("ScheduleServlet?msg=timeout_school" + paramStr);
                     return;
                 }
                 if ("TO_HOME".equals(direction) && now.getHour() >= 16) {
-                    response.sendRedirect("ScheduleServlet?msg=timeout_home");
+                    response.sendRedirect("ScheduleServlet?msg=timeout_home" + paramStr);
                     return;
                 }
             }
 
             ScheduleDAO dao = new ScheduleDAO();
+            
+            // Check Capacity Override
+            dal.HocSinhDAO hsDAO = new dal.HocSinhDAO();
+            int students = hsDAO.countActiveHocSinhByRoute(routeID);
+            
+            if (students == 0) {
+                 response.sendRedirect("ScheduleServlet?msg=no_students" + paramStr);
+                 return;
+            }
+            
+            // Calculate current assigned capacity
+            java.util.List<Schedule> allSchedules = dao.getAllSchedules();
+            dal.BusDAO busDAO = new dal.BusDAO();
+            int currentAssignedCapacity = 0;
+            for (Schedule s : allSchedules) {
+                if (s.getRouteID() == routeID && s.getDate().equals(date) && s.getDirection().equals(direction) && !"CANCELLED".equals(s.getStatus())) {
+                    model.Bus b = busDAO.getBusById(s.getBusID());
+                    if (b != null) {
+                        currentAssignedCapacity += (b.getCapacity() - 2);
+                    }
+                }
+            }
+            
+            if (currentAssignedCapacity >= students) {
+                 response.sendRedirect("ScheduleServlet?msg=overcapacity" + paramStr);
+                 return;
+            }
 
             if (dao.isConflict(date, direction, driverID, monitorID, busID)) {
-                response.sendRedirect("ScheduleServlet?msg=conflict");
+                response.sendRedirect("ScheduleServlet?msg=conflict" + paramStr);
                 return;
             }
 
@@ -165,9 +206,9 @@ public class ScheduleServlet extends HttpServlet {
             boolean success = dao.insertSchedule(s);
 
             if (success) {
-                response.sendRedirect("ScheduleServlet?msg=success");
+                response.sendRedirect("ScheduleServlet?msg=success&selectedDate=" + date.toString());
             } else {
-                response.sendRedirect("ScheduleServlet?msg=error");
+                response.sendRedirect("ScheduleServlet?msg=error" + paramStr);
             }
         } catch (Exception e) {
             response.sendRedirect("ScheduleServlet?msg=invalid");

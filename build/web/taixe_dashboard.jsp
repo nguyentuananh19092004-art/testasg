@@ -63,9 +63,11 @@
                                     <button type="submit" class="btn btn-danger btn-lg mb-2"><i class="bi bi-play-circle-fill me-2"></i> Bắt đầu chuyến đi</button>
                                 </form>
                                 <% } else if ("IN_PROGRESS".equals(schedule.getStatus())) { %>
-                                    <span class="badge bg-success fs-5 mb-2"><i class="bi bi-truck"></i> Đang chạy</span>
+                                    <span class="badge bg-success fs-5 mb-2 me-2"><i class="bi bi-truck"></i> Đang chạy</span>
+                                    <button type="button" class="btn btn-success btn-lg mb-2" data-bs-toggle="modal" data-bs-target="#completeTripModal">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Kết thúc chuyến đi
+                                    </button>
                                 <% } %>
-                                
                                 <% if (!"INCIDENT".equals(schedule.getIncidentStatus())) { %>
                                 <form action="driver-action" method="POST" class="mt-2">
                                     <input type="hidden" name="action" value="report_incident">
@@ -107,5 +109,51 @@
             </div>
         </div>
     </div>
+    
+    <% if (schedule != null && "IN_PROGRESS".equals(schedule.getStatus())) { %>
+    <!-- Modal Kết thúc chuyến đi -->
+    <div class="modal fade" id="completeTripModal" tabindex="-1" aria-labelledby="completeTripModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="driver-action" method="POST">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title fw-bold" id="completeTripModalLabel"><i class="bi bi-check-circle-fill me-2"></i>Xác nhận kết thúc chuyến</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Vui lòng đánh giá tình trạng xe <b><%= bus != null ? bus.getLicensePlate() : "" %></b> sau chuyến đi:</p>
+                        <input type="hidden" name="action" value="complete_trip">
+                        <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                        <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="busCondition" id="conditionOK" value="OK" checked>
+                            <label class="form-check-label text-success fw-bold" for="conditionOK">
+                                <i class="bi bi-check-circle me-1"></i> Xe bình thường (Sẵn sàng chạy tiếp)
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="busCondition" id="conditionBad" value="MAINTENANCE">
+                            <label class="form-check-label text-danger fw-bold" for="conditionBad">
+                                <i class="bi bi-tools me-1"></i> Xe có vấn đề (Cần bảo dưỡng/Sửa chữa)
+                            </label>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Ghi chú thêm (nếu có):</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Xe kêu to, điều hòa yếu..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success fw-bold">Xác nhận hoàn tất</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

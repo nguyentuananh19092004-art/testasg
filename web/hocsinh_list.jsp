@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.List"%>
+<%@page import="java.util.Map"%>
 <%@page import="model.HocSinh"%>
 <!DOCTYPE html>
 <html>
@@ -24,12 +25,14 @@
                         <th>Tên TK</th>
                         <th>Mật khẩu</th>
                         <th>Trạng thái</th>
+                        <th>Lộ trình</th>
                         <th>Hành động</th>
                     </tr>
                 </thead>
                     <tbody>
                         <%
                             List<HocSinh> hocsinhList = (List<HocSinh>) request.getAttribute("hocsinhList");
+                            Map<Integer, String> routeMap = (Map<Integer, String>) request.getAttribute("routeMap");
                             if (hocsinhList != null) {
                                 for (HocSinh hs : hocsinhList) {
                         %>
@@ -40,6 +43,13 @@
                             <td><%= hs.getTenTK() %></td>
                             <td><%= hs.getMatKhau() %></td>
                             <td><%= hs.getTrangThai() %></td>
+                            <td>
+                                <% if (hs.getDefaultRouteID() != null && routeMap != null && routeMap.containsKey(hs.getDefaultRouteID())) { %>
+                                    <%= routeMap.get(hs.getDefaultRouteID()) %>
+                                <% } else { %>
+                                    <span class="text-muted">Chưa có</span>
+                                <% } %>
+                            </td>
                             <td>
                                 <a href="hocsinh-edit?id=<%= hs.getMaHocSinh() %>" class="btn btn-sm btn-warning">Sửa</a>
                                 <a href="hocsinh-delete?id=<%= hs.getMaHocSinh() %>" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa học sinh này?');">Xóa</a>
