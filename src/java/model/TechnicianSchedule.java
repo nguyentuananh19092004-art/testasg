@@ -8,6 +8,7 @@ public class TechnicianSchedule {
     private int technicianID;
     private Date date;
     private Timestamp createdAt;
+    private String status;
     
     // Additional field for display
     private String technicianName;
@@ -15,11 +16,12 @@ public class TechnicianSchedule {
     public TechnicianSchedule() {
     }
 
-    public TechnicianSchedule(int techScheduleID, int technicianID, Date date, Timestamp createdAt) {
+    public TechnicianSchedule(int techScheduleID, int technicianID, Date date, Timestamp createdAt, String status) {
         this.techScheduleID = techScheduleID;
         this.technicianID = technicianID;
         this.date = date;
         this.createdAt = createdAt;
+        this.status = status;
     }
 
     public int getTechScheduleID() {
@@ -60,5 +62,13 @@ public class TechnicianSchedule {
 
     public void setTechnicianName(String technicianName) {
         this.technicianName = technicianName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

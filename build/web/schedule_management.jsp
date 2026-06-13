@@ -104,6 +104,8 @@
         <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân thêm xe! Tuyến này đã đủ sức chứa cho số lượng học sinh hiện tại (không cần thêm xe).</div>
     <% } else if("no_students".equals(request.getParameter("msg"))) { %>
         <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Không thể phân xe! Tuyến này hiện không có học sinh nào đăng ký hoạt động.</div>
+    <% } else if("tech_on_leave".equals(request.getParameter("msg"))) { %>
+        <div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><i class="bi bi-x-circle-fill me-2"></i><strong>Lỗi:</strong> Nhân sự này đã được duyệt nghỉ phép vào ngày được chọn!</div>
     <% } %>
 
     <% 
@@ -349,17 +351,29 @@
                                 <th>ID Ca</th>
                                 <th>Ngày làm việc</th>
                                 <th>Tên Kỹ thuật viên</th>
+                                <th>Trạng thái</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% if(techSchedules != null && !techSchedules.isEmpty()) { 
-                                for(model.TechnicianSchedule ts : techSchedules) { %>
+                                for(model.TechnicianSchedule ts : techSchedules) { 
+                                    String statusBadge = "bg-warning text-dark";
+                                    String statusText = "Chờ xử lý";
+                                    if ("IN_PROGRESS".equals(ts.getStatus())) {
+                                        statusBadge = "bg-primary";
+                                        statusText = "Đang thực hiện";
+                                    } else if ("COMPLETED".equals(ts.getStatus())) {
+                                        statusBadge = "bg-success";
+                                        statusText = "Hoàn tất";
+                                    }
+                            %>
                                 <tr>
                                     <td>#<%= ts.getTechScheduleID() %></td>
                                     <td class="fw-bold text-primary"><%= ts.getDate() %></td>
                                     <td><%= ts.getTechnicianName() %></td>
+                                    <td><span class="badge <%= statusBadge %>"><%= statusText %></span></td>
                                     <td class="text-muted"><%= new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(ts.getCreatedAt()) %></td>
                                     <td>
                                         <form action="tech-schedule" method="POST" style="display:inline;">

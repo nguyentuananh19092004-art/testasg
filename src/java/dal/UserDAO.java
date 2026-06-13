@@ -346,4 +346,33 @@ public class UserDAO extends DBContext {
         }
         return false;
     }
+
+    public boolean updateUserStatus(int userID, String status) {
+        String sql = "UPDATE Users SET Status = ? WHERE UserID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, status);
+            st.setInt(2, userID);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean isLeaveApproved(int userID, java.sql.Date date) {
+        String sql = "SELECT 1 FROM UserLeaves WHERE UserID = ? AND LeaveDate = ? AND Status = 'APPROVED'";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, userID);
+            st.setDate(2, date);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
 }

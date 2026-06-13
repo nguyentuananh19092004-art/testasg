@@ -68,16 +68,32 @@
                                         <i class="bi bi-check-circle-fill me-2"></i>Kết thúc chuyến đi
                                     </button>
                                 <% } %>
-                                <% if (!"INCIDENT".equals(schedule.getIncidentStatus())) { %>
+                                <% if ("NORMAL".equals(schedule.getIncidentStatus()) || "DRIVER_SWITCHED".equals(schedule.getIncidentStatus()) || schedule.getIncidentStatus() == null) { %>
                                 <form action="driver-action" method="POST" class="mt-2">
                                     <input type="hidden" name="action" value="report_incident">
                                     <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
                                     <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
                                     <button type="submit" class="btn btn-outline-warning" onclick="return confirm('Xác nhận báo hỏng xe để yêu cầu kỹ thuật viên hỗ trợ?');"><i class="bi bi-exclamation-triangle"></i> Báo hỏng xe</button>
                                 </form>
-                                <% } else { %>
-                                    <div class="mt-2 text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Đã báo sự cố</div>
-                                <% } %>
+                                <% } else { 
+                                    String iStatus = schedule.getIncidentStatus();
+                                    if ("INCIDENT".equals(iStatus)) {
+                                %>
+                                    <div class="mt-2 text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Đang chờ kỹ thuật đến...</div>
+                                <%  } else if ("DISPATCHED".equals(iStatus)) { %>
+                                    <div class="mt-2 text-warning fw-bold"><i class="bi bi-truck"></i> Kỹ thuật đang mang xe dự phòng đến...</div>
+                                <%  } else if ("ARRIVED".equals(iStatus)) { %>
+                                    <div class="mt-2 text-primary fw-bold"><i class="bi bi-geo-alt-fill"></i> Kỹ thuật đã đến nơi, chuẩn bị bàn giao...</div>
+                                <%  } else if ("HANDED_OVER".equals(iStatus) || "TECH_RESOLVED".equals(iStatus)) { %>
+                                    <form action="driver-action" method="POST" class="mt-2">
+                                        <input type="hidden" name="action" value="switch_bus">
+                                        <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                                        <input type="hidden" name="newBusID" value="<%= schedule.getReplacementBusID() %>">
+                                        <input type="hidden" name="oldBusID" value="<%= schedule.getBusID() %>">
+                                        <button type="submit" class="btn btn-success fw-bold pulse-button" onclick="return confirm('Xác nhận đã nhận xe dự phòng và tiếp tục hành trình?');"><i class="bi bi-arrow-repeat"></i> Đổi xe và Tiếp tục hành trình</button>
+                                    </form>
+                                <%  } 
+                                   } %>
                             </div>
                         </div>
                     </div>

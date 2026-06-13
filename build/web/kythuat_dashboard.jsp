@@ -10,6 +10,20 @@
     List<Schedule> incidentSchedules = (List<Schedule>) request.getAttribute("incidentSchedules");
     List<Bus> maintenanceBuses = (List<Bus>) request.getAttribute("maintenanceBuses");
     Map<Integer, Bus> busMap = (Map<Integer, Bus>) request.getAttribute("busMap");
+    List<TechnicianSchedule> mySchedules = (List<TechnicianSchedule>) request.getAttribute("mySchedules");
+    List<Bus> availableBuses = (List<Bus>) request.getAttribute("availableBuses");
+    
+    // Find today's schedule
+    java.time.LocalDate today = java.time.LocalDate.now();
+    TechnicianSchedule todaySchedule = null;
+    if (mySchedules != null) {
+        for (TechnicianSchedule ts : mySchedules) {
+            if (ts.getDate().toLocalDate().equals(today)) {
+                todaySchedule = ts;
+                break;
+            }
+        }
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -45,6 +59,49 @@
         <h2 class="fw-bold mb-4">Điều phối xe tăng cường & Bảo dưỡng</h2>
         
         <div class="row g-4">
+            
+            <div class="col-md-12 mb-2">
+                <div class="card dashboard-card border-start border-primary border-5">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold text-primary mb-1"><i class="bi bi-clock-history me-2"></i>Ca làm việc hôm nay (<%= today.toString() %>)</h5>
+                            <% if (todaySchedule == null) { %>
+                                <p class="text-muted mb-0">Hôm nay bạn không có lịch trực xưởng.</p>
+                            <% } else { 
+                                String statusBadge = "bg-warning text-dark";
+                                String statusText = "Chưa bắt đầu";
+                                if ("IN_PROGRESS".equals(todaySchedule.getStatus())) {
+                                    statusBadge = "bg-primary";
+                                    statusText = "Đang trong ca";
+                                } else if ("COMPLETED".equals(todaySchedule.getStatus())) {
+                                    statusBadge = "bg-success";
+                                    statusText = "Đã hoàn tất ca";
+                                }
+                            %>
+                                <p class="mb-0">Trạng thái ca: <span class="badge <%= statusBadge %>"><%= statusText %></span></p>
+                            <% } %>
+                        </div>
+                        <div>
+                            <% if (todaySchedule != null) { 
+                                if ("PENDING".equals(todaySchedule.getStatus())) { %>
+                                    <form action="technician-action" method="POST" class="m-0">
+                                        <input type="hidden" name="action" value="start_shift">
+                                        <input type="hidden" name="scheduleID" value="<%= todaySchedule.getTechScheduleID() %>">
+                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2"><i class="bi bi-play-circle-fill me-2"></i> Bắt đầu vào ca</button>
+                                    </form>
+                            <%  } else if ("IN_PROGRESS".equals(todaySchedule.getStatus())) { %>
+                                    <form action="technician-action" method="POST" class="m-0">
+                                        <input type="hidden" name="action" value="end_shift">
+                                        <input type="hidden" name="scheduleID" value="<%= todaySchedule.getTechScheduleID() %>">
+                                        <button type="submit" class="btn btn-success fw-bold px-4 py-2"><i class="bi bi-check-circle-fill me-2"></i> Hoàn tất ca làm</button>
+                                    </form>
+                            <%  } 
+                               } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-7">
                 <div class="card dashboard-card border-start border-danger border-5 h-100">
                     <div class="card-body">
@@ -52,18 +109,57 @@
                         <% if (incidentSchedules != null && !incidentSchedules.isEmpty()) { %>
                             <div class="list-group">
                             <% for (Schedule s : incidentSchedules) { 
-                                Bus b = busMap.get(s.getBusID());
+                                String isStatus = s.getIncidentStatus();
+                                int brokenBusID = "DRIVER_SWITCHED".equals(isStatus) ? s.getReplacementBusID() : s.getBusID();
+                                Bus b = busMap.get(brokenBusID);
                             %>
                                 <div class="list-group-item list-group-item-action flex-column align-items-start border-danger mb-2 rounded">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h6 class="mb-1 fw-bold">Tuyến ID: <%= s.getRouteID() %> - Lỗi xe <%= b != null ? b.getLicensePlate() : "" %></h6>
-                                        <small class="text-danger fw-bold">KHẨN CẤP</small>
+                                        <small class="text-danger fw-bold"><%= isStatus.equals("INCIDENT") ? "KHẨN CẤP" : "ĐANG XỬ LÝ" %></small>
                                     </div>
-                                    <p class="mb-1">Tài xế đã báo sự cố. Cần điều xe dự phòng đến hỗ trợ đưa đón học sinh và đưa xe <%= b != null ? b.getLicensePlate() : "" %> về xưởng.</p>
+                                    <p class="mb-1">
+                                        <% if ("INCIDENT".equals(isStatus)) { %>
+                                            Tài xế báo sự cố. Vui lòng chọn xe dự phòng và bấm Điều xe.
+                                        <% } else if ("DISPATCHED".equals(isStatus)) { %>
+                                            Đã điều xe dự phòng (ID: <%= s.getReplacementBusID() %>). Đang di chuyển...
+                                        <% } else if ("ARRIVED".equals(isStatus)) { %>
+                                            Đã đến nơi. Hãy bàn giao xe dự phòng cho tài xế.
+                                        <% } else if ("HANDED_OVER".equals(isStatus)) { %>
+                                            Đã bàn giao xe cho tài xế. Đang chờ tài xế xác nhận Đổi xe...
+                                        <% } else if ("DRIVER_SWITCHED".equals(isStatus)) { %>
+                                            Tài xế đã nhận xe dự phòng và tiếp tục hành trình. Vui lòng chuyển xe hỏng về xưởng bảo dưỡng.
+                                        <% } %>
+                                    </p>
+                                    
                                     <form action="technician-action" method="POST" class="mt-2 text-end">
-                                        <input type="hidden" name="action" value="resolve_incident">
                                         <input type="hidden" name="scheduleID" value="<%= s.getScheduleID() %>">
-                                        <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-truck me-1"></i> Đã điều xe / Xử lý xong</button>
+                                        <input type="hidden" name="brokenBusID" value="<%= brokenBusID %>">
+                                        
+                                        <% if ("INCIDENT".equals(isStatus)) { %>
+                                            <input type="hidden" name="action" value="dispatch_bus">
+                                            <div class="d-inline-flex gap-2 align-items-center">
+                                                <select name="replacementBusID" class="form-select form-select-sm" required style="width: auto;">
+                                                    <option value="" disabled selected>-- Chọn xe dự phòng --</option>
+                                                    <% if(availableBuses != null) { for(Bus ab : availableBuses) { %>
+                                                        <option value="<%= ab.getBusID() %>"><%= ab.getLicensePlate() %> (<%= ab.getCapacity() %> chỗ)</option>
+                                                    <% } } %>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-truck me-1"></i> Điều xe</button>
+                                            </div>
+                                        <% } else if ("DISPATCHED".equals(isStatus)) { %>
+                                            <input type="hidden" name="action" value="arrive_incident">
+                                            <button type="submit" class="btn btn-sm btn-warning text-dark"><i class="bi bi-geo-alt-fill me-1"></i> Đã đến nơi xe gặp sự cố</button>
+                                        <% } else if ("ARRIVED".equals(isStatus)) { %>
+                                            <input type="hidden" name="action" value="handover_bus">
+                                            <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-key-fill me-1"></i> Bàn giao xe cho lái xe</button>
+                                        <% } else if ("HANDED_OVER".equals(isStatus)) { %>
+                                            <!-- Chờ tài xế xác nhận đổi xe -->
+                                            <button type="button" class="btn btn-sm btn-secondary" disabled><i class="bi bi-clock-history me-1"></i> Chờ tài xế xác nhận đổi xe...</button>
+                                        <% } else if ("DRIVER_SWITCHED".equals(isStatus)) { %>
+                                            <!-- Chuyển xe cũ vào bảo dưỡng và hoàn tất -->
+                                            <button type="submit" name="action" value="mark_maintenance" class="btn btn-sm btn-secondary"><i class="bi bi-tools me-1"></i> Sửa chữa/Chuyển xe hỏng về xưởng</button>
+                                        <% } %>
                                     </form>
                                 </div>
                             <% } %>

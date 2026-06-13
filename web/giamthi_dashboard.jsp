@@ -104,8 +104,7 @@
                             <!-- Danh sách học sinh tại điểm này -->
                             <div class="bg-light p-3 rounded">
                                 <strong><i class="bi bi-people me-1"></i> <%= isReturn ? "Học sinh xuống xe:" : "Học sinh lên xe:" %></strong>
-                                <% List<HocSinh> hsList = studentsByStop.get(s.getStopID());
-                                   if (hsList != null && !hsList.isEmpty()) { %>
+                                <% if (hsList != null && !hsList.isEmpty()) { %>
                                    <ul class="list-unstyled mt-2 mb-0">
                                    <% for (HocSinh hs : hsList) { %>
                                        <li class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">

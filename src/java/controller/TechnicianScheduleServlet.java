@@ -47,6 +47,12 @@ public class TechnicianScheduleServlet extends HttpServlet {
                 return;
             }
 
+            dal.UserDAO userDAO = new dal.UserDAO();
+            if (userDAO.isLeaveApproved(technicianID, date)) {
+                response.sendRedirect("ScheduleServlet?msg=tech_on_leave");
+                return;
+            }
+
             boolean success = dao.insertTechnicianSchedule(technicianID, date);
             if (success) {
                 response.sendRedirect("ScheduleServlet?msg=tech_success");

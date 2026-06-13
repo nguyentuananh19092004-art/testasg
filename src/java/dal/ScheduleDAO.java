@@ -26,7 +26,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("DriverID"),
                         rs.getInt("MonitorID"),
                         rs.getString("Status"),
-                        rs.getString("IncidentStatus")
+                        rs.getString("IncidentStatus"),
+                        rs.getInt("ReplacementBusID")
                 );
                 list.add(s);
             }
@@ -62,7 +63,8 @@ public class ScheduleDAO extends DBContext {
                     rs.getInt("DriverID"),
                     rs.getInt("MonitorID"),
                     rs.getString("Status"),
-                    rs.getString("IncidentStatus")
+                    rs.getString("IncidentStatus"),
+                    rs.getInt("ReplacementBusID")
                 );
                 list.add(s);
             }
@@ -127,7 +129,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("DriverID"),
                         rs.getInt("MonitorID"),
                         rs.getString("Status"),
-                        rs.getString("IncidentStatus")
+                        rs.getString("IncidentStatus"),
+                        rs.getInt("ReplacementBusID")
                 );
             }
         } catch (SQLException e) {
@@ -152,7 +155,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("DriverID"),
                         rs.getInt("MonitorID"),
                         rs.getString("Status"),
-                        rs.getString("IncidentStatus")
+                        rs.getString("IncidentStatus"),
+                        rs.getInt("ReplacementBusID")
                 );
             }
         } catch (SQLException e) {
@@ -163,7 +167,7 @@ public class ScheduleDAO extends DBContext {
 
     public List<Schedule> getIncidentSchedules() {
         List<Schedule> list = new ArrayList<>();
-        String sql = "SELECT * FROM Schedules WHERE IncidentStatus = 'INCIDENT' AND Status != 'COMPLETED' AND Status != 'CANCELLED'";
+        String sql = "SELECT * FROM Schedules WHERE IncidentStatus IN ('INCIDENT', 'DISPATCHED', 'ARRIVED', 'HANDED_OVER', 'DRIVER_SWITCHED') AND Status != 'COMPLETED' AND Status != 'CANCELLED'";
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
@@ -177,7 +181,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("DriverID"),
                         rs.getInt("MonitorID"),
                         rs.getString("Status"),
-                        rs.getString("IncidentStatus")
+                        rs.getString("IncidentStatus"),
+                        rs.getInt("ReplacementBusID")
                 ));
             }
         } catch (SQLException e) {
@@ -205,7 +210,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("DriverID"),
                         rs.getInt("MonitorID"),
                         rs.getString("Status"),
-                        rs.getString("IncidentStatus")
+                        rs.getString("IncidentStatus"),
+                        rs.getInt("ReplacementBusID")
                 );
             }
         } catch (SQLException e) {
@@ -275,7 +281,8 @@ public class ScheduleDAO extends DBContext {
                         rs.getInt("TechScheduleID"),
                         rs.getInt("TechnicianID"),
                         rs.getDate("Date"),
-                        rs.getTimestamp("CreatedAt")
+                        rs.getTimestamp("CreatedAt"),
+                        rs.getString("Status")
                 );
                 ts.setTechnicianName(rs.getString("FullName"));
                 list.add(ts);
@@ -287,7 +294,7 @@ public class ScheduleDAO extends DBContext {
     }
 
     public boolean insertTechnicianSchedule(int technicianID, Date date) {
-        String sql = "INSERT INTO TechnicianSchedules (TechnicianID, Date) VALUES (?, ?)";
+        String sql = "INSERT INTO TechnicianSchedules (TechnicianID, Date, Status) VALUES (?, ?, 'PENDING')";
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setInt(1, technicianID);
@@ -304,6 +311,93 @@ public class ScheduleDAO extends DBContext {
         try {
             PreparedStatement st = connection.prepareStatement(sql);
             st.setInt(1, id);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+    public boolean updateTechnicianScheduleStatus(int id, String status) {
+        String sql = "UPDATE TechnicianSchedules SET Status = ? WHERE TechScheduleID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, status);
+            st.setInt(2, id);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+    public List<model.TechnicianSchedule> getTechnicianSchedulesByUser(int technicianID) {
+        List<model.TechnicianSchedule> list = new ArrayList<>();
+        String sql = "SELECT ts.*, u.FullName FROM TechnicianSchedules ts JOIN Users u ON ts.TechnicianID = u.UserID WHERE ts.TechnicianID = ? ORDER BY ts.Date DESC";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, technicianID);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                model.TechnicianSchedule ts = new model.TechnicianSchedule(
+                        rs.getInt("TechScheduleID"),
+                        rs.getInt("TechnicianID"),
+                        rs.getDate("Date"),
+                        rs.getTimestamp("CreatedAt"),
+                        rs.getString("Status")
+                );
+                ts.setTechnicianName(rs.getString("FullName"));
+                list.add(ts);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return list;
+    }
+
+    public boolean updateIncidentStatus(int scheduleID, String status, int replacementBusID) {
+        String sql;
+        if (replacementBusID > 0) {
+            sql = "UPDATE Schedules SET IncidentStatus = ?, ReplacementBusID = ? WHERE ScheduleID = ?";
+        } else {
+            sql = "UPDATE Schedules SET IncidentStatus = ? WHERE ScheduleID = ?";
+        }
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            if (replacementBusID > 0) {
+                st.setString(1, status);
+                st.setInt(2, replacementBusID);
+                st.setInt(3, scheduleID);
+            } else {
+                st.setString(1, status);
+                st.setInt(2, scheduleID);
+            }
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+
+    public boolean applyBusReplacement(int scheduleID, int newBusID, int oldBusID) {
+        String sql = "UPDATE Schedules SET BusID = ?, ReplacementBusID = ?, IncidentStatus = 'DRIVER_SWITCHED' WHERE ScheduleID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, newBusID);
+            st.setInt(2, oldBusID);
+            st.setInt(3, scheduleID);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println(e);
+            return false;
+        }
+    }
+    
+    public boolean finishIncident(int scheduleID) {
+        String sql = "UPDATE Schedules SET ReplacementBusID = NULL, IncidentStatus = 'NORMAL' WHERE ScheduleID = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setInt(1, scheduleID);
             return st.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println(e);

@@ -219,18 +219,24 @@
             <div class="login-header">
                 <h3>Đăng nhập hệ thống</h3>
                 <p>Vui lòng nhập tài khoản của bạn</p>
+                <% String error = (String) request.getAttribute("errorMessage");
+                   if (error != null) { %>
+                    <div class="alert alert-danger mt-3 mb-0 py-2"><i class="bi bi-exclamation-circle-fill me-2"></i><%= error %></div>
+                <% } %>
             </div>
 
             <form action="LoginServlet" method="POST">
 
+                <% String usernameVal = (String) request.getAttribute("username"); 
+                   String passwordVal = (String) request.getAttribute("password"); %>
                 <!-- Credentials -->
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Tên đăng nhập" required>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Tên đăng nhập" value="<%= usernameVal != null ? usernameVal : "" %>" required>
                     <label for="username">Tên đăng nhập</label>
                 </div>
                 
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" value="<%= passwordVal != null ? passwordVal : "" %>" required>
                     <label for="password">Mật khẩu</label>
                 </div>
 

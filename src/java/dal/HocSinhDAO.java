@@ -159,6 +159,17 @@ public class HocSinhDAO extends DBContext {
         }
     }
 
+    public void stopService(String maHocSinh) {
+        String sql = "UPDATE HocSinh SET TrangThai = N'Ngưng hoạt động', DefaultStopID = NULL, DefaultRouteID = NULL WHERE MaHocSinh = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, maHocSinh);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
     public void deleteHocSinh(String maHocSinh) {
         // Lưu ý: Nếu có liên kết với bảng Attendances, có thể cần xóa ở bảng con trước
         String sql = "DELETE FROM HocSinh WHERE MaHocSinh = ?";

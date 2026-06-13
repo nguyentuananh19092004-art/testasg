@@ -44,6 +44,12 @@
     </nav>
 
     <div class="container my-5">
+        <% if ("stopped".equals(request.getParameter("msg"))) { %>
+            <div class="alert alert-warning alert-dismissible fade show">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <i class="bi bi-info-circle-fill me-2"></i><strong>Thông báo:</strong> Dịch vụ đón học sinh bằng xe bus đã được ngưng từ ngày mai. Trạng thái học sinh đã chuyển về "Ngưng hoạt động".
+            </div>
+        <% } %>
         <% if (student != null) { %>
         <h2 class="fw-bold mb-4">Thông tin của học sinh: <span class="text-primary"><%= student.getTenHocSinh() %> (Lớp <%= student.getLop() %>)</span></h2>
         
@@ -133,6 +139,17 @@
                             
                             <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Cập nhật điểm đón</button>
                         </form>
+                        
+                        <% if ("Sử dụng".equals(student.getTrangThai()) || "Nghỉ".equals(student.getTrangThai())) { %>
+                        <hr>
+                        <h6 class="fw-bold text-danger mb-3">Hủy dịch vụ</h6>
+                        <form action="parent-action" method="POST" class="d-inline">
+                            <input type="hidden" name="action" value="stop_service">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Bạn muốn ngưng dịch vụ đón học sinh bằng xe bus?\n(Dịch vụ sẽ ngừng từ ngày mai đồng thời trạng thái chuyển về ngưng hoạt động)');">
+                                <i class="bi bi-x-circle me-1"></i> Ngưng dịch vụ xe bus
+                            </button>
+                        </form>
+                        <% } %>
                     </div>
                 </div>
             </div>

@@ -30,7 +30,12 @@ public class DriverActionServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         int scheduleID = Integer.parseInt(request.getParameter("scheduleID"));
-        int busID = Integer.parseInt(request.getParameter("busID"));
+        
+        String busIdParam = request.getParameter("busID");
+        int busID = 0;
+        if (busIdParam != null && !busIdParam.isEmpty()) {
+            busID = Integer.parseInt(busIdParam);
+        }
 
         ScheduleDAO scheduleDAO = new ScheduleDAO();
         BusDAO busDAO = new BusDAO();
@@ -60,6 +65,13 @@ public class DriverActionServlet extends HttpServlet {
                 updateBusStatus(busID, "Bảo dưỡng/Sửa chữa", busDAO);
                 updateScheduleIncidentStatus(scheduleID, note != null && !note.isEmpty() ? "Báo hỏng: " + note : "Cần bảo dưỡng", scheduleDAO);
             }
+        } else if ("switch_bus".equals(action)) {
+            int newBusID = Integer.parseInt(request.getParameter("newBusID"));
+            int oldBusID = Integer.parseInt(request.getParameter("oldBusID"));
+            // 1. applyBusReplacement in ScheduleDAO (swaps BusID and ReplacementBusID, sets DRIVER_SWITCHED)
+            scheduleDAO.applyBusReplacement(scheduleID, newBusID, oldBusID);
+            // 2. update new bus status to Hoạt động
+            updateBusStatus(newBusID, "Hoạt động", busDAO);
         }
 
         response.sendRedirect("driver-dashboard");

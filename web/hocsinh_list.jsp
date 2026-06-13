@@ -16,6 +16,12 @@
                 <a href="hocsinh-add" class="btn btn-primary">Thêm học sinh</a>
                 <a href="AdminDashboardServlet" class="btn btn-outline-secondary">Về Dashboard</a>
             </div>
+            <% if ("stopped".equals(request.getParameter("msg"))) { %>
+                <div class="alert alert-warning alert-dismissible fade show">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="bi bi-info-circle-fill me-2"></i><strong>Thông báo:</strong> Dịch vụ ngưng hoạt động từ ngày mai. Trạng thái học sinh đã chuyển về "Ngưng hoạt động".
+                </div>
+            <% } %>
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>

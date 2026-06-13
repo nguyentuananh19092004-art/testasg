@@ -12,10 +12,12 @@ public class Schedule {
     private int monitorID;
     private String status;
     private String incidentStatus;
+    private int replacementBusID;
 
     // Các đối tượng liên kết (để hiển thị chi tiết ra View)
     private Route route;
     private Bus bus;
+    private Bus replacementBus;
     private User driver;
     private User monitor;
 
@@ -32,6 +34,20 @@ public class Schedule {
         this.monitorID = monitorID;
         this.status = status;
         this.incidentStatus = incidentStatus;
+        this.replacementBusID = 0;
+    }
+
+    public Schedule(int scheduleID, Date date, String direction, int routeID, int busID, int driverID, int monitorID, String status, String incidentStatus, int replacementBusID) {
+        this.scheduleID = scheduleID;
+        this.date = date;
+        this.direction = direction;
+        this.routeID = routeID;
+        this.busID = busID;
+        this.driverID = driverID;
+        this.monitorID = monitorID;
+        this.status = status;
+        this.incidentStatus = incidentStatus;
+        this.replacementBusID = replacementBusID;
     }
 
     public int getScheduleID() {
@@ -136,5 +152,21 @@ public class Schedule {
 
     public void setMonitor(User monitor) {
         this.monitor = monitor;
+    }
+
+    public int getReplacementBusID() {
+        return replacementBusID;
+    }
+
+    public void setReplacementBusID(int replacementBusID) {
+        this.replacementBusID = replacementBusID;
+    }
+
+    public Bus getReplacementBus() {
+        return replacementBus;
+    }
+
+    public void setReplacementBus(Bus replacementBus) {
+        this.replacementBus = replacementBus;
     }
 }

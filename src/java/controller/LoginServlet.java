@@ -74,7 +74,9 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect("index.jsp");
             }
         } else {
-            request.setAttribute("errorMessage", "Ten dang nhap hoac mat khau khong dung!");
+            request.setAttribute("errorMessage", "Sai tài khoản, mật khẩu!");
+            request.setAttribute("username", username);
+            request.setAttribute("password", password);
             request.getRequestDispatcher("dang_nhap.jsp").forward(request, response);
         }
     }

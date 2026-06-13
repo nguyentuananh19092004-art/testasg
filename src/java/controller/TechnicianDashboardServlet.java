@@ -39,8 +39,20 @@ public class TechnicianDashboardServlet extends HttpServlet {
             if(!busMap.containsKey(s.getBusID())) {
                 busMap.put(s.getBusID(), busDAO.getBusById(s.getBusID()));
             }
+            if(s.getReplacementBusID() > 0 && !busMap.containsKey(s.getReplacementBusID())) {
+                busMap.put(s.getReplacementBusID(), busDAO.getBusById(s.getReplacementBusID()));
+            }
         }
         request.setAttribute("busMap", busMap);
+
+        int userID = (int) session.getAttribute("userID");
+        List<model.TechnicianSchedule> mySchedules = scheduleDAO.getTechnicianSchedulesByUser(userID);
+        request.setAttribute("mySchedules", mySchedules);
+        
+        List<Bus> availableBuses = busDAO.getAllBuses().stream()
+                .filter(b -> "Sẵn sàng".equals(b.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+        request.setAttribute("availableBuses", availableBuses);
 
         request.getRequestDispatcher("kythuat_dashboard.jsp").forward(request, response);
     }

@@ -54,6 +54,10 @@ public class ParentActionServlet extends HttpServlet {
             int notifID = Integer.parseInt(request.getParameter("notifID"));
             NotificationDAO notifDAO = new NotificationDAO();
             notifDAO.markAsRead(notifID);
+        } else if ("stop_service".equals(action)) {
+            hsDAO.stopService(student.getMaHocSinh());
+            response.sendRedirect("parent-dashboard?msg=stopped");
+            return;
         }
 
         response.sendRedirect("parent-dashboard");
