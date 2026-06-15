@@ -40,11 +40,14 @@ public class DriverActionServlet extends HttpServlet {
         ScheduleDAO scheduleDAO = new ScheduleDAO();
         BusDAO busDAO = new BusDAO();
 
-        if ("start_trip".equals(action)) {
+        if ("start_moving".equals(action)) {
+            // Update Schedule Status to PREPARING
+            updateScheduleStatus(scheduleID, "PREPARING", scheduleDAO);
+            // Optional: Update Bus Status to Hoạt động early
+            updateBusStatus(busID, "Hoạt động", busDAO);
+        } else if ("start_trip".equals(action)) {
             // Update Schedule Status to IN_PROGRESS
             updateScheduleStatus(scheduleID, "IN_PROGRESS", scheduleDAO);
-            // Update Bus Status to Hoạt động
-            updateBusStatus(busID, "Hoạt động", busDAO);
         } else if ("report_incident".equals(action)) {
             // Update Schedule IncidentStatus to INCIDENT
             updateScheduleIncidentStatus(scheduleID, "INCIDENT", scheduleDAO);

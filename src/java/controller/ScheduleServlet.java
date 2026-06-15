@@ -78,7 +78,7 @@ public class ScheduleServlet extends HttpServlet {
         request.setAttribute("selectedDate", selectedDate.toString());
         
         // Filter schedules to only show the selected date
-        schedules = schedules.stream().filter(s -> s.getDate().equals(sqlSelectedDate)).collect(Collectors.toList());
+        schedules = schedules.stream().filter(s -> s.getDate().toString().equals(sqlSelectedDate.toString())).collect(Collectors.toList());
         
         for (Route r : routes) {
             int students = hsDAO.countActiveHocSinhByRoute(r.getRouteID());
@@ -100,7 +100,7 @@ public class ScheduleServlet extends HttpServlet {
                 int assignedSchool = 0;
                 int assignedHome = 0;
                 for (Schedule s : schedules) {
-                    if (s.getRouteID() == r.getRouteID() && s.getDate().equals(sqlSelectedDate)) {
+                    if (s.getRouteID() == r.getRouteID() && s.getDate().toString().equals(sqlSelectedDate.toString())) {
                         Bus b = buses.stream().filter(bus -> bus.getBusID() == s.getBusID()).findFirst().orElse(null);
                         if (b != null) {
                             if ("TO_SCHOOL".equals(s.getDirection())) assignedSchool += (b.getCapacity() - 2);
@@ -121,6 +121,7 @@ public class ScheduleServlet extends HttpServlet {
         request.setAttribute("capacityWarnings", capacityWarnings);
         
         List<model.TechnicianSchedule> techSchedules = scheduleDAO.getTechnicianSchedules();
+        techSchedules = techSchedules.stream().filter(ts -> ts.getDate().toString().equals(sqlSelectedDate.toString())).collect(Collectors.toList());
 
         request.setAttribute("drivers", drivers);
         request.setAttribute("monitors", monitors);
@@ -184,7 +185,7 @@ public class ScheduleServlet extends HttpServlet {
             dal.BusDAO busDAO = new dal.BusDAO();
             int currentAssignedCapacity = 0;
             for (Schedule s : allSchedules) {
-                if (s.getRouteID() == routeID && s.getDate().equals(date) && s.getDirection().equals(direction) && !"CANCELLED".equals(s.getStatus())) {
+                if (s.getRouteID() == routeID && s.getDate().toString().equals(date.toString()) && s.getDirection().equals(direction) && !"CANCELLED".equals(s.getStatus())) {
                     model.Bus b = busDAO.getBusById(s.getBusID());
                     if (b != null) {
                         currentAssignedCapacity += (b.getCapacity() - 2);

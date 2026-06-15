@@ -70,8 +70,14 @@
                         <% if (stops != null && !stops.isEmpty()) { 
                             boolean isReturn = "Về nhà".equals(schedule.getDirection());
                             List<String> attendedStudents = (List<String>) request.getAttribute("attendedStudents");
+                            boolean isActiveStopFound = false;
                             for (Stop s : stops) { 
                                 boolean isReached = reachedStops != null && reachedStops.contains(s.getStopID());
+                                boolean isActiveStop = false;
+                                if (!isReached && !isActiveStopFound) {
+                                    isActiveStop = true;
+                                    isActiveStopFound = true;
+                                }
                                 List<HocSinh> hsList = studentsByStop.get(s.getStopID());
                                 boolean allAttended = true;
                                 if (hsList != null && !hsList.isEmpty()) {
@@ -86,15 +92,19 @@
                         <div class="stop-item <%= isReached ? "stop-reached" : "" %>">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="fw-bold mb-0 text-primary"><%= s.getStopName() %> <small class="text-muted">(<%= isReturn ? s.getReturnTime() : s.getEstimatedTime() %>)</small></h6>
-                                <% if (!isReached) { %>
+                                <% if (!"IN_PROGRESS".equals(schedule.getStatus())) { %>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Chờ tài xế bắt đầu vào lộ trình</span>
+                                <% } else if (!isReached && isActiveStop) { %>
                                 <form action="monitor-action" method="POST" class="m-0">
                                     <input type="hidden" name="action" value="reach_stop">
                                     <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
                                     <input type="hidden" name="stopID" value="<%= s.getStopID() %>">
                                     <button type="submit" class="btn btn-sm btn-success" <%= allAttended ? "" : "disabled title='Vui lòng điểm danh tất cả học sinh trước khi qua điểm'" %>>
-                                        <i class="bi bi-check2-circle"></i> Báo Đã Đến
+                                        <i class="bi bi-check2-circle"></i> Hoàn tất
                                     </button>
                                 </form>
+                                <% } else if (!isReached) { %>
+                                    <span class="badge bg-secondary">Chờ đến điểm</span>
                                 <% } else { %>
                                     <span class="badge bg-secondary"><i class="bi bi-check-all"></i> Đã đi qua</span>
                                 <% } %>
@@ -115,6 +125,9 @@
                                                <% } else if (attendedStudents != null && attendedStudents.contains(hs.getMaHocSinh())) { %>
                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Đã điểm danh</span>
                                                <% } else { %>
+                                                    <% if (!"IN_PROGRESS".equals(schedule.getStatus())) { %>
+                                                        <span class="badge bg-warning text-dark border"><i class="bi bi-hourglass-top"></i> Xe chưa vào lộ trình</span>
+                                                    <% } else if (!isReached && isActiveStop) { %>
                                                     <form action="monitor-action" method="POST" class="d-inline">
                                                         <input type="hidden" name="action" value="notify_parent">
                                                         <input type="hidden" name="hocSinhTK" value="<%= hs.getTenTK() %>">
@@ -128,8 +141,10 @@
                                                         <input type="hidden" name="maHocSinh" value="<%= hs.getMaHocSinh() %>">
                                                         <input type="hidden" name="direction" value="<%= schedule.getDirection() %>">
                                                         <button type="submit" name="isAbsent" value="false" class="btn btn-sm btn-outline-success"><i class="bi bi-person-check"></i> <%= isReturn ? "Đã Xuống" : "Đã Lên" %></button>
-                                                        <button type="submit" name="isAbsent" value="true" class="btn btn-sm btn-outline-danger"><i class="bi bi-person-x"></i> Vắng</button>
                                                     </form>
+                                                    <% } else { %>
+                                                        <span class="badge bg-light text-dark border">Chưa đến lượt</span>
+                                                    <% } %>
                                                <% } %>
                                            </div>
                                        </li>

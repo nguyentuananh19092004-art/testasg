@@ -57,11 +57,37 @@
                             <div class="text-end">
                                 <% if ("PENDING".equals(schedule.getStatus())) { %>
                                 <form action="driver-action" method="POST" class="d-inline">
-                                    <input type="hidden" name="action" value="start_trip">
+                                    <input type="hidden" name="action" value="start_moving">
                                     <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
                                     <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
-                                    <button type="submit" class="btn btn-danger btn-lg mb-2"><i class="bi bi-play-circle-fill me-2"></i> Bắt đầu chuyến đi</button>
+                                    <button type="submit" class="btn btn-primary btn-lg mb-2"><i class="bi bi-car-front-fill me-2"></i> Hoàn tất kiểm tra xe & Di chuyển</button>
                                 </form>
+                                <% } else if ("PREPARING".equals(schedule.getStatus())) { 
+                                    Stop firstStop = (Stop) request.getAttribute("firstStop");
+                                    boolean canStart = true;
+                                    String timeStr = null;
+                                    if (firstStop != null) {
+                                        timeStr = schedule.getDirection().equals("TO_SCHOOL") ? firstStop.getEstimatedTime() : firstStop.getReturnTime();
+                                        if (timeStr != null && !timeStr.isEmpty()) {
+                                            try {
+                                                java.time.LocalTime firstTime = java.time.LocalTime.parse(timeStr);
+                                                if (java.time.LocalTime.now().isBefore(firstTime)) {
+                                                    canStart = false;
+                                                }
+                                            } catch (Exception e) {}
+                                        }
+                                    }
+                                %>
+                                    <% if (canStart) { %>
+                                    <form action="driver-action" method="POST" class="d-inline">
+                                        <input type="hidden" name="action" value="start_trip">
+                                        <input type="hidden" name="scheduleID" value="<%= schedule.getScheduleID() %>">
+                                        <input type="hidden" name="busID" value="<%= schedule.getBusID() %>">
+                                        <button type="submit" class="btn btn-danger btn-lg mb-2"><i class="bi bi-play-circle-fill me-2"></i> Bắt đầu vào lộ trình</button>
+                                    </form>
+                                    <% } else { %>
+                                        <button type="button" class="btn btn-secondary btn-lg mb-2" disabled title="Chưa đến giờ đón tại điểm đầu tiên"><i class="bi bi-clock-history me-2"></i> Chờ đến giờ (<%= timeStr %>)</button>
+                                    <% } %>
                                 <% } else if ("IN_PROGRESS".equals(schedule.getStatus())) { %>
                                     <span class="badge bg-success fs-5 mb-2 me-2"><i class="bi bi-truck"></i> Đang chạy</span>
                                     <button type="button" class="btn btn-success btn-lg mb-2" data-bs-toggle="modal" data-bs-target="#completeTripModal">

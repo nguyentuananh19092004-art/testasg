@@ -56,9 +56,48 @@ public class MonitorDashboardServlet extends HttpServlet {
                 request.setAttribute("stops", stops);
 
                 HocSinhDAO hsDAO = new HocSinhDAO();
+                List<Schedule> allSchedules = scheduleDAO.getAllSchedules();
+                List<Schedule> relatedSchedules = allSchedules.stream()
+                        .filter(s -> s.getRouteID() == activeSchedule.getRouteID() &&
+                                     s.getDate().toString().equals(activeSchedule.getDate().toString()) &&
+                                     s.getDirection().equals(activeSchedule.getDirection()) &&
+                                     !"CANCELLED".equals(s.getStatus()))
+                        .sorted((s1, s2) -> Integer.compare(s1.getScheduleID(), s2.getScheduleID()))
+                        .collect(java.util.stream.Collectors.toList());
+
+                List<HocSinh> allRouteStudents = new java.util.ArrayList<>();
+                for (Stop s : stops) {
+                    List<HocSinh> hsList = hsDAO.getHocSinhByStopID(s.getStopID());
+                    for (HocSinh hs : hsList) {
+                        if ("Sử dụng".equals(hs.getTrangThai()) || "Nghỉ".equals(hs.getTrangThai())) {
+                            allRouteStudents.add(hs);
+                        }
+                    }
+                }
+                allRouteStudents.sort((h1, h2) -> h1.getMaHocSinh().compareTo(h2.getMaHocSinh()));
+
+                List<HocSinh> assignedStudents = new java.util.ArrayList<>();
+                int currentIndex = 0;
+                for (Schedule s : relatedSchedules) {
+                    model.Bus b = busDAO.getBusById(s.getBusID());
+                    int capacity = b != null ? Math.max(0, b.getCapacity() - 2) : 0;
+                    
+                    if (s.getScheduleID() == activeSchedule.getScheduleID()) {
+                        int endIndex = Math.min(currentIndex + capacity, allRouteStudents.size());
+                        if (currentIndex < allRouteStudents.size()) {
+                            assignedStudents = new java.util.ArrayList<>(allRouteStudents.subList(currentIndex, endIndex));
+                        }
+                        break;
+                    }
+                    currentIndex += capacity;
+                }
+
                 Map<Integer, List<HocSinh>> studentsByStop = new HashMap<>();
                 for (Stop s : stops) {
-                    studentsByStop.put(s.getStopID(), hsDAO.getHocSinhByStopID(s.getStopID()));
+                    List<HocSinh> stopStudents = assignedStudents.stream()
+                            .filter(hs -> hs.getDefaultStopID() != null && hs.getDefaultStopID() == s.getStopID())
+                            .collect(java.util.stream.Collectors.toList());
+                    studentsByStop.put(s.getStopID(), stopStudents);
                 }
                 request.setAttribute("studentsByStop", studentsByStop);
 

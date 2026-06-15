@@ -40,6 +40,15 @@ public class DriverDashboardServlet extends HttpServlet {
                 request.setAttribute("bus", busDAO.getBusById(activeSchedule.getBusID()));
                 
                 request.setAttribute("monitor", userDAO.getUserById(activeSchedule.getMonitorID()));
+
+                dal.StopDAO stopDAO = new dal.StopDAO();
+                java.util.List<model.Stop> stops = stopDAO.getStopsByRoute(activeSchedule.getRouteID());
+                if (stops != null && !stops.isEmpty()) {
+                    if ("Về nhà".equals(activeSchedule.getDirection())) {
+                        java.util.Collections.reverse(stops);
+                    }
+                    request.setAttribute("firstStop", stops.get(0));
+                }
             }
         }
 

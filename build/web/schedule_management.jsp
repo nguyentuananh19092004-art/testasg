@@ -342,7 +342,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Danh sách Ca Kỹ thuật</h5>
+                    <h5 class="mb-0">Danh sách Ca Kỹ thuật Ngày <%= selectedDate %></h5>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-hover table-striped mb-0 text-nowrap">
