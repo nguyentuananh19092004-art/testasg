@@ -67,10 +67,11 @@
                                     boolean canStart = true;
                                     String timeStr = null;
                                     if (firstStop != null) {
-                                        timeStr = schedule.getDirection().equals("TO_SCHOOL") ? firstStop.getEstimatedTime() : firstStop.getReturnTime();
-                                        if (timeStr != null && !timeStr.isEmpty()) {
+                                        java.sql.Time stopTime = schedule.getDirection().equals("TO_SCHOOL") ? firstStop.getEstimatedTime() : firstStop.getReturnTime();
+                                        if (stopTime != null) {
+                                            timeStr = stopTime.toString();
                                             try {
-                                                java.time.LocalTime firstTime = java.time.LocalTime.parse(timeStr);
+                                                java.time.LocalTime firstTime = stopTime.toLocalTime();
                                                 if (java.time.LocalTime.now().isBefore(firstTime)) {
                                                     canStart = false;
                                                 }
